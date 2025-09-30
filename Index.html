@@ -1,0 +1,4469 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>نظام إدارة نقل الطلاب - متكامل</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="https://cdn.jsdelivr.net/gh/davidshimjs/qrcodejs@gh-pages/qrcode.min.js"></script>
+    <style>
+        :root {
+            --primary: #2c3e50;
+            --secondary: #3498db;
+            --success: #27ae60;
+            --warning: #f39c12;
+            --danger: #e74c3c;
+            --light: #ecf0f1;
+            --dark: #2c3e50;
+            --bg-color: #f8f9fa;
+            --card-bg: #ffffff;
+            --text-color: #2c3e50;
+            --border-color: #ddd;
+            --shadow: 0 2px 4px rgba(0,0,0,0.1);
+            --radius: 12px;
+        }
+
+        .dark-theme {
+            --bg-color: #1a1a1a;
+            --card-bg: #2d2d2d;
+            --text-color: #ffffff;
+            --border-color: #444;
+            --shadow: 0 2px 4px rgba(0,0,0,0.3);
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+
+        body {
+            background-color: var(--bg-color);
+            color: var(--text-color);
+            transition: all 0.3s ease;
+            line-height: 1.6;
+            padding-bottom: 80px;
+            overflow-x: hidden;
+            min-height: 100vh;
+        }
+
+        .container {
+            width: 100%;
+            max-width: 100%;
+            padding: 15px;
+            margin: 0 auto;
+        }
+
+        .hidden {
+            display: none !important;
+        }
+
+        /* صفحة الدخول المحسنة */
+        .login-page {
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            padding: 20px;
+        }
+
+        .login-card {
+            background: var(--card-bg);
+            padding: 30px;
+            border-radius: 15px;
+            box-shadow: var(--shadow);
+            text-align: center;
+            width: 100%;
+            max-width: 400px;
+            position: relative;
+        }
+
+        .login-header {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 15px;
+            margin-bottom: 20px;
+        }
+
+        .system-logo {
+            width: 60px;
+            height: 60px;
+            border-radius: 50%;
+            background: var(--secondary);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 24px;
+            color: white;
+            border: 3px solid white;
+            overflow: hidden;
+        }
+
+        .system-logo img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+
+        .system-name {
+            font-size: 20px;
+            font-weight: bold;
+            color: var(--text-color);
+        }
+
+        /* تحديث شكل الصور الشخصية */
+        .profile-picture {
+            position: absolute;
+            bottom: -35px;
+            left: 20px;
+            width: 70px;
+            height: 90px;
+            border-radius: 8px;
+            border: 3px solid var(--card-bg);
+            background: var(--light);
+            overflow: hidden;
+        }
+
+        .profile-picture img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+
+        .student-avatar {
+            width: 100px;
+            height: 130px;
+            border-radius: 8px;
+            margin: 0 auto 15px;
+            border: 3px solid white;
+            overflow: hidden;
+        }
+
+        .student-avatar img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+
+        .post-avatar {
+            width: 40px;
+            height: 52px;
+            border-radius: 6px;
+            background: var(--light);
+            overflow: hidden;
+        }
+
+        .post-avatar img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+
+        /* تحسينات الباركود */
+        .qrcode-container {
+            text-align: center;
+            margin: 15px 0;
+            padding: 15px;
+            background: var(--light);
+            border-radius: var(--radius);
+        }
+
+        .qrcode-container canvas {
+            border: 2px solid var(--border-color);
+            border-radius: 8px;
+            background: white;
+            padding: 10px;
+        }
+
+        .print-btn {
+            margin-top: 10px;
+        }
+
+        /* تحسينات الشعار في الهيدر */
+        .company-logo {
+            width: 50px;
+            height: 50px;
+            border-radius: 50%;
+            overflow: hidden;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: var(--secondary);
+            color: white;
+            font-size: 20px;
+            margin-left: 15px;
+        }
+
+        .company-logo img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+
+        .company-info {
+            display: flex;
+            align-items: center;
+            margin-bottom: 15px;
+        }
+
+        /* تحسينات المنشورات المثبتة */
+        .pinned-post {
+            border-right: 4px solid var(--warning) !important;
+            background: rgba(243, 156, 18, 0.05);
+        }
+
+        .pin-badge {
+            background: var(--warning);
+            color: white;
+            padding: 2px 8px;
+            border-radius: 12px;
+            font-size: 10px;
+            margin-right: 5px;
+        }
+
+        /* تحسينات نظام الردود */
+        .reply-section {
+            margin-top: 10px;
+            padding-top: 10px;
+            border-top: 1px solid var(--border-color);
+        }
+
+        .reply-item {
+            background: var(--light);
+            padding: 10px;
+            border-radius: 8px;
+            margin-top: 5px;
+            font-size: 13px;
+        }
+
+        .reply-header {
+            display: flex;
+            justify-content: space-between;
+            font-weight: bold;
+            margin-bottom: 5px;
+        }
+
+        /* إخفاء المعرفات في تسجيل الدخول */
+        .student-login-options {
+            max-height: 200px;
+            overflow-y: auto;
+            margin: 10px 0;
+            border: 1px solid var(--border-color);
+            border-radius: 8px;
+            padding: 10px;
+        }
+
+        .student-option {
+            padding: 8px;
+            margin: 5px 0;
+            background: var(--light);
+            border-radius: 6px;
+            cursor: pointer;
+            transition: background 0.3s;
+        }
+
+        .student-option:hover {
+            background: var(--secondary);
+            color: white;
+        }
+
+        /* تحسينات الإشعارات */
+        .notification-link {
+            cursor: pointer;
+            transition: background 0.3s;
+        }
+
+        .notification-link:hover {
+            background: rgba(52, 152, 219, 0.1);
+        }
+
+        /* الأزرار */
+        .btn {
+            padding: 12px 20px;
+            border: none;
+            border-radius: var(--radius);
+            cursor: pointer;
+            font-size: 14px;
+            font-weight: 600;
+            transition: all 0.3s ease;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            margin: 5px;
+        }
+
+        .btn-primary {
+            background: var(--secondary);
+            color: white;
+        }
+
+        .btn-secondary {
+            background: var(--light);
+            color: var(--dark);
+        }
+
+        .btn-success {
+            background: var(--success);
+            color: white;
+        }
+
+        .btn-warning {
+            background: var(--warning);
+            color: white;
+        }
+
+        .btn-danger {
+            background: var(--danger);
+            color: white;
+        }
+
+        .btn-small {
+            padding: 8px 12px;
+            font-size: 12px;
+        }
+
+        .btn-block {
+            width: 100%;
+            display: block;
+            justify-content: center;
+        }
+
+        .btn:hover {
+            transform: translateY(-2px);
+            box-shadow: var(--shadow);
+        }
+
+        /* الهيدر المعدل للطالب */
+        .profile-header {
+            height: 180px;
+            background-size: cover;
+            background-position: center;
+            border-radius: var(--radius);
+            position: relative;
+            margin-bottom: 70px;
+            background-color: #f0f0f0;
+        }
+
+        .profile-actions {
+            position: absolute;
+            top: 15px;
+            right: 15px;
+            display: flex;
+            gap: 10px;
+        }
+
+        .student-info-panel {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            margin-top: 40px;
+            padding: 0 15px;
+        }
+
+        .student-details {
+            flex: 1;
+        }
+
+        .student-details h2 {
+            font-size: 18px;
+            margin-bottom: 5px;
+        }
+
+        .student-details p {
+            margin: 3px 0;
+            font-size: 13px;
+            color: #666;
+        }
+
+        .student-actions {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+
+        .header-actions {
+            display: flex;
+            gap: 10px;
+            margin-top: 15px;
+            flex-wrap: wrap;
+        }
+
+        /* القائمة المنسدلة */
+        .dropdown {
+            position: relative;
+            display: inline-block;
+        }
+
+        .dropdown-content {
+            display: none;
+            position: absolute;
+            background-color: var(--card-bg);
+            min-width: 200px;
+            box-shadow: var(--shadow);
+            z-index: 1000;
+            border-radius: var(--radius);
+            padding: 10px;
+            top: 100%;
+            right: 0;
+            margin-top: 5px;
+        }
+
+        .dropdown:hover .dropdown-content {
+            display: block;
+        }
+
+        .dropdown-item {
+            padding: 10px 15px;
+            display: block;
+            width: 100%;
+            text-align: right;
+            border: none;
+            background: none;
+            color: var(--text-color);
+            cursor: pointer;
+            border-radius: 5px;
+            margin-bottom: 5px;
+        }
+
+        .dropdown-item:hover {
+            background-color: var(--light);
+        }
+
+        /* التنقل السفلي المحسن */
+        .bottom-nav {
+            position: fixed;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            background: var(--card-bg);
+            padding: 10px 5px;
+            display: flex;
+            justify-content: flex-start;
+            box-shadow: 0 -2px 10px rgba(0,0,0,0.1);
+            z-index: 1000;
+            gap: 2px;
+            overflow-x: auto;
+            scrollbar-width: none;
+            -ms-overflow-style: none;
+        }
+
+        .bottom-nav::-webkit-scrollbar {
+            display: none;
+        }
+
+        .nav-item {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            padding: 8px;
+            cursor: pointer;
+            border-radius: var(--radius);
+            transition: all 0.3s ease;
+            min-width: 70px;
+            flex-shrink: 0;
+        }
+
+        .nav-item.active {
+            background: var(--secondary);
+            color: white;
+        }
+
+        .nav-item i {
+            font-size: 16px;
+            margin-bottom: 3px;
+        }
+
+        .nav-item span {
+            font-size: 10px;
+            text-align: center;
+            line-height: 1.2;
+        }
+
+        /* البطاقات */
+        .card {
+            background: var(--card-bg);
+            border-radius: var(--radius);
+            padding: 20px;
+            margin-bottom: 15px;
+            box-shadow: var(--shadow);
+        }
+
+        .card-title {
+            font-size: 16px;
+            font-weight: 700;
+            margin-bottom: 15px;
+            color: var(--secondary);
+            border-bottom: 2px solid var(--secondary);
+            padding-bottom: 10px;
+        }
+
+        /* الجداول */
+        .table-container {
+            width: 100%;
+            overflow-x: auto;
+            margin: 15px 0;
+        }
+
+        .table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 13px;
+            min-width: 600px;
+        }
+
+        .table th, .table td {
+            padding: 10px;
+            text-align: right;
+            border-bottom: 1px solid var(--border-color);
+        }
+
+        .table th {
+            background: var(--light);
+            font-weight: 600;
+        }
+
+        /* النماذج */
+        .form-group {
+            margin-bottom: 15px;
+        }
+
+        .form-label {
+            display: block;
+            margin-bottom: 5px;
+            font-weight: 600;
+            font-size: 14px;
+        }
+
+        .form-control {
+            width: 100%;
+            padding: 10px;
+            border: 1px solid var(--border-color);
+            border-radius: 8px;
+            background: var(--card-bg);
+            color: var(--text-color);
+            font-size: 14px;
+        }
+
+        /* الإحصائيات */
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 15px;
+            margin: 20px 0;
+        }
+
+        .stat-card {
+            background: var(--light);
+            padding: 20px;
+            border-radius: var(--radius);
+            text-align: center;
+        }
+
+        .stat-number {
+            font-size: 24px;
+            font-weight: bold;
+            color: var(--secondary);
+            margin-bottom: 5px;
+        }
+
+        .stat-label {
+            font-size: 12px;
+            color: var(--text-color);
+        }
+
+        /* نظام الحجز المطور */
+        .booking-tabs {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 20px;
+            flex-wrap: wrap;
+        }
+
+        .booking-tab {
+            padding: 10px 20px;
+            background: var(--light);
+            border-radius: var(--radius);
+            cursor: pointer;
+            font-weight: 600;
+        }
+
+        .booking-tab.active {
+            background: var(--secondary);
+            color: white;
+        }
+
+        .booking-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 15px 0;
+        }
+
+        .booking-table th, .booking-table td {
+            padding: 8px;
+            text-align: center;
+            border: 1px solid var(--border-color);
+        }
+
+        .booking-cell {
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-weight: 600;
+            min-width: 60px;
+        }
+
+        .booking-cell.available {
+            background: var(--success);
+            color: white;
+        }
+
+        .booking-cell.booked {
+            background: var(--secondary);
+            color: white;
+        }
+
+        .booking-cell.mine {
+            background: var(--primary);
+            color: white;
+        }
+
+        .booking-cell.disabled {
+            background: var(--light);
+            color: #999;
+            cursor: not-allowed;
+        }
+
+        .booking-cell.closed {
+            background: var(--danger);
+            color: white;
+        }
+
+        .time-label {
+            font-weight: bold;
+            background: var(--light);
+        }
+
+        /* المنشورات */
+        .post-card {
+            background: var(--card-bg);
+            border-radius: var(--radius);
+            padding: 15px;
+            margin: 10px 0;
+            border-right: 3px solid var(--secondary);
+        }
+
+        .post-header {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            margin-bottom: 10px;
+        }
+
+        .post-actions {
+            display: flex;
+            gap: 15px;
+            margin-top: 10px;
+            padding-top: 10px;
+            border-top: 1px solid var(--border-color);
+        }
+
+        .post-action {
+            display: flex;
+            align-items: center;
+            gap: 5px;
+            cursor: pointer;
+            color: var(--text-color);
+        }
+
+        .post-action.active {
+            color: var(--secondary);
+        }
+
+        /* النوافذ المنبثقة */
+        .modal {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0,0,0,0.5);
+            display: none;
+            align-items: center;
+            justify-content: center;
+            z-index: 2000;
+            padding: 20px;
+        }
+
+        .modal-content {
+            background: var(--card-bg);
+            border-radius: var(--radius);
+            padding: 25px;
+            width: 100%;
+            max-width: 500px;
+            max-height: 80vh;
+            overflow-y: auto;
+        }
+
+        /* الرسوم البيانية */
+        .chart-container {
+            width: 100%;
+            height: 250px;
+            margin: 20px 0;
+        }
+
+        /* بطاقة الطالب */
+        .student-card {
+            background: white;
+            border-radius: 15px;
+            padding: 20px;
+            box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+            text-align: center;
+            max-width: 350px;
+            margin: 0 auto;
+        }
+
+        .student-card-header {
+            background: linear-gradient(135deg, #3498db, #2c3e50);
+            color: white;
+            padding: 15px;
+            border-radius: 10px 10px 0 0;
+            margin: -20px -20px 20px -20px;
+        }
+
+        .student-info {
+            margin: 15px 0;
+        }
+
+        .student-info-item {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 10px;
+            padding-bottom: 5px;
+            border-bottom: 1px solid #eee;
+        }
+
+        /* الإشعارات */
+        .notification-badge {
+            position: absolute;
+            top: -5px;
+            right: -5px;
+            background: var(--danger);
+            color: white;
+            border-radius: 50%;
+            width: 18px;
+            height: 18px;
+            font-size: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .notification-item {
+            padding: 10px;
+            border-bottom: 1px solid var(--border-color);
+            cursor: pointer;
+        }
+
+        .notification-item.unread {
+            background: rgba(52, 152, 219, 0.1);
+        }
+
+        .notification-item:hover {
+            background: var(--light);
+        }
+
+        .notification-popup {
+            position: fixed;
+            top: 20px;
+            left: 20px;
+            right: 20px;
+            background: var(--card-bg);
+            border-radius: var(--radius);
+            padding: 15px;
+            box-shadow: var(--shadow);
+            z-index: 3000;
+            display: none;
+            animation: fadeInOut 5s forwards;
+        }
+
+        @keyframes fadeInOut {
+            0% { opacity: 0; transform: translateY(-20px); }
+            10% { opacity: 1; transform: translateY(0); }
+            90% { opacity: 1; transform: translateY(0); }
+            100% { opacity: 0; transform: translateY(-20px); }
+        }
+
+        /* تحسينات الحجز الثابت */
+        .weekly-booking {
+            margin-bottom: 20px;
+        }
+
+        .day-selector {
+            display: flex;
+            gap: 5px;
+            margin-bottom: 15px;
+            flex-wrap: wrap;
+        }
+
+        .day-btn {
+            padding: 8px 12px;
+            background: var(--light);
+            border-radius: var(--radius);
+            cursor: pointer;
+            font-size: 12px;
+        }
+
+        .day-btn.active {
+            background: var(--secondary);
+            color: white;
+        }
+
+        .day-btn.closed {
+            background: var(--danger);
+            color: white;
+        }
+
+        @media (max-width: 768px) {
+            .container {
+                padding: 10px;
+            }
+            
+            .stats-grid {
+                grid-template-columns: 1fr;
+            }
+            
+            .header-actions {
+                flex-direction: column;
+            }
+            
+            .nav-item span {
+                font-size: 9px;
+            }
+            
+            .profile-header {
+                height: 150px;
+                margin-bottom: 60px;
+            }
+            
+            .profile-picture {
+                width: 60px;
+                height: 80px;
+                bottom: -30px;
+            }
+            
+            .student-info-panel {
+                flex-direction: column;
+                gap: 15px;
+            }
+            
+            .student-actions {
+                flex-direction: row;
+                width: 100%;
+                justify-content: space-between;
+            }
+        }
+
+        @media (max-width: 480px) {
+            .login-card {
+                padding: 20px;
+            }
+            
+            .card {
+                padding: 15px;
+            }
+            
+            .btn {
+                padding: 10px 15px;
+                font-size: 13px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- صفحة الدخول المحسنة -->
+    <div id="loginPage" class="login-page">
+        <div class="login-card">
+            <div class="login-header">
+                <div class="system-logo" id="systemLogo">
+                    <i class="fas fa-bus"></i>
+                </div>
+                <div class="system-name" id="systemName">نظام إدارة نقل الطلاب</div>
+            </div>
+            <p style="margin: 15px 0; color: #666;">تسجيل الدخول إلى النظام المتكامل</p>
+            <div style="display: flex; flex-direction: column; gap: 10px;">
+                <button class="btn btn-primary btn-block" onclick="loginAsAdmin()">
+                    <i class="fas fa-user-shield"></i> دخول المشرف
+                </button>
+                <button class="btn btn-secondary btn-block" onclick="showStudentLoginOptions()">
+                    <i class="fas fa-user-graduate"></i> دخول الطالب
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- الواجهة الرئيسية -->
+    <div id="mainApp" class="hidden">
+        <div class="container">
+            <!-- الهيدر -->
+            <div id="mainHeader">
+                <!-- سيتم تحميل الهيدر ديناميكياً -->
+            </div>
+
+            <!-- محتوى الأقسام -->
+            <div id="appContent">
+                <!-- المحتوى سيتم تحميله هنا -->
+            </div>
+        </div>
+
+        <!-- التنقل السفلي المحسن -->
+        <div class="bottom-nav" id="bottomNav">
+            <!-- الأزرار سيتم إضافتها ديناميكياً -->
+        </div>
+    </div>
+
+    <!-- النوافذ المنبثقة -->
+    <div id="modal" class="modal">
+        <div class="modal-content" id="modalContent">
+            <!-- محتوى النافذة المنبثقة -->
+        </div>
+    </div>
+
+    <!-- نافذة الإشعارات المنبثقة -->
+    <div id="notificationPopup" class="notification-popup">
+        <!-- محتوى الإشعارات المنبثقة -->
+    </div>
+
+    <script>
+        // ==================== حالة النظام المتكاملة ====================
+        const SYSTEM_KEY = 'student_transport_system_integrated_final';
+        let state = {
+            company: {
+                name: 'نظام إدارة نقل الطلاب',
+                logo: null,
+                version: 'الإصدار النهائي'
+            },
+            students: [],
+            packages: [],
+            trips: [],
+            posts: [],
+            comments: [],
+            likes: [],
+            notes: [],
+            messages: [],
+            bookings: {
+                departure: {},
+                return: {},
+                weekly: {
+                    saturday: { departure: {}, return: {} },
+                    sunday: { departure: {}, return: {} },
+                    monday: { departure: {}, return: {} },
+                    tuesday: { departure: {}, return: {} },
+                    wednesday: { departure: {}, return: {} },
+                    thursday: { departure: {}, return: {} }
+                },
+                weeklyClosed: false,
+                bookingEnabled: true
+            },
+            bookingLog: [],
+            settings: {
+                theme: 'light',
+                adminPassword: 'admin123',
+                notificationSound: true,
+                adminName: 'المشرف'
+            },
+            currentUser: null,
+            isAdmin: false,
+            currentSection: 'dashboard',
+            viewingProfile: null,
+            adminProfile: {
+                profilePhoto: null,
+                coverPhoto: null
+            },
+            notifications: [],
+            weeklySchedule: ['saturday', 'sunday', 'monday', 'tuesday', 'wednesday', 'thursday']
+        };
+
+        // ==================== دوال المساعدة ====================
+        const $ = (selector) => document.querySelector(selector);
+        const $$ = (selector) => document.querySelectorAll(selector);
+
+        function generateId(prefix = '') {
+            const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
+            let result = '';
+            for (let i = 0; i < 8; i++) {
+                result += chars.charAt(Math.floor(Math.random() * chars.length));
+            }
+            return prefix + result;
+        }
+
+        function formatDate(date) {
+            return new Date(date).toLocaleDateString('ar-EG');
+        }
+
+        function formatTime(date) {
+            return new Date(date).toLocaleTimeString('ar-EG', { hour: '2-digit', minute: '2-digit' });
+        }
+
+        function escapeHtml(text) {
+            if (!text) return '';
+            const div = document.createElement('div');
+            div.textContent = text;
+            return div.innerHTML;
+        }
+
+        // ==================== إدارة التخزين ====================
+        function saveState() {
+            try {
+                localStorage.setItem(SYSTEM_KEY, JSON.stringify(state));
+                return true;
+            } catch (e) {
+                console.error('Error saving state:', e);
+                return false;
+            }
+        }
+
+        function loadState() {
+            try {
+                const saved = localStorage.getItem(SYSTEM_KEY);
+                if (saved) {
+                    const loaded = JSON.parse(saved);
+                    Object.keys(state).forEach(key => {
+                        if (loaded[key] !== undefined) {
+                            if (typeof state[key] === 'object' && state[key] !== null && !Array.isArray(state[key])) {
+                                state[key] = { ...state[key], ...loaded[key] };
+                            } else {
+                                state[key] = loaded[key];
+                            }
+                        }
+                    });
+                }
+            } catch (e) {
+                console.error('Error loading state:', e);
+            }
+            initSampleData();
+        }
+
+        function initSampleData() {
+            if (state.students.length === 0) {
+                state.students = [
+                    {
+                        id: 'S1001',
+                        name: 'أحمد محمد',
+                        phone: '0595000001',
+                        packageId: 'P001',
+                        rides: 40,
+                        route: 'شمال المدينة - المدرسة',
+                        profilePhoto: null,
+                        coverPhoto: null,
+                        profilePublic: true,
+                        password: null,
+                        academicYear: '2023/2024'
+                    },
+                    {
+                        id: 'S1002',
+                        name: 'فاطمة أحمد',
+                        phone: '0595000002',
+                        packageId: 'P002',
+                        rides: 20,
+                        route: 'جنوب المدينة - المدرسة',
+                        profilePhoto: null,
+                        coverPhoto: null,
+                        profilePublic: true,
+                        password: null,
+                        academicYear: '2023/2024'
+                    },
+                    {
+                        id: 'S1003',
+                        name: 'محمد علي',
+                        phone: '0595000003',
+                        packageId: 'P001',
+                        rides: 40,
+                        route: 'شرق المدينة - المدرسة',
+                        profilePhoto: null,
+                        coverPhoto: null,
+                        profilePublic: true,
+                        password: null,
+                        academicYear: '2023/2024'
+                    }
+                ];
+            }
+
+            if (state.packages.length === 0) {
+                state.packages = [
+                    {
+                        id: 'P001',
+                        name: 'باقة الذهاب والإياب',
+                        price: 300,
+                        rides: 40,
+                        color: '#3498db'
+                    },
+                    {
+                        id: 'P002',
+                        name: 'باقة الذهاب فقط',
+                        price: 200,
+                        rides: 20,
+                        color: '#e74c3c'
+                    },
+                    {
+                        id: 'P003',
+                        name: 'باقة الإياب فقط',
+                        price: 150,
+                        rides: 20,
+                        color: '#27ae60'
+                    }
+                ];
+            }
+
+            if (state.posts.length === 0) {
+                state.posts = [
+                    {
+                        id: 'POST001',
+                        studentId: 'admin',
+                        content: 'مرحباً بكم في نظام إدارة نقل الطلاب المتكامل! 🚌✨\n\nنتمنى لكم تجربة ممتعة وسهلة في استخدام النظام.',
+                        date: new Date().toISOString(),
+                        likes: [],
+                        comments: [],
+                        images: [],
+                        visible: true
+                    }
+                ];
+            }
+
+            saveState();
+        }
+
+        // ==================== نظام الدخول ====================
+        function loginAsAdmin() {
+            const password = prompt('أدخل كلمة مرور المشرف:');
+            if (password === state.settings.adminPassword) {
+                state.isAdmin = true;
+                state.currentUser = null;
+                state.viewingProfile = null;
+                showMainApp();
+                alert('مرحباً بك يا مشرف! 👑');
+            } else if (password !== null) {
+                alert('كلمة المرور غير صحيحة ❌');
+            }
+        }
+
+        function showStudentLoginOptions() {
+            if (state.students.length === 0) {
+                alert('⚠️ لا يوجد طلاب مسجلين في النظام.');
+                return;
+            }
+
+            showModal(`
+                <div class="card-title">اختر الطالب للدخول</div>
+                <p style="margin-bottom: 15px; color: #666;">اختر اسمك من القائمة أدناه:</p>
+                <div class="student-login-options">
+                    ${state.students.map(student => `
+                        <div class="student-option" onclick="selectStudentForLogin('${student.id}')">
+                            ${student.name}
+                        </div>
+                    `).join('')}
+                </div>
+                <div style="margin-top: 20px;">
+                    <button class="btn btn-secondary" onclick="hideModal()">إلغاء</button>
+                </div>
+            `);
+        }
+
+        function selectStudentForLogin(studentId) {
+            const student = state.students.find(s => s.id === studentId);
+            if (student) {
+                if (student.password) {
+                    const password = prompt('أدخل كلمة المرور:');
+                    if (password !== student.password) {
+                        alert('كلمة المرور غير صحيحة');
+                        return;
+                    }
+                }
+                state.isAdmin = false;
+                state.currentUser = student;
+                state.viewingProfile = null;
+                hideModal();
+                showMainApp();
+                alert(`مرحباً بك ${student.name}! 🎓`);
+            }
+        }
+
+        function showMainApp() {
+            $('#loginPage').classList.add('hidden');
+            $('#mainApp').classList.remove('hidden');
+            initializeApp();
+        }
+
+        function logout() {
+            state.currentUser = null;
+            state.isAdmin = false;
+            state.viewingProfile = null;
+            $('#mainApp').classList.add('hidden');
+            $('#loginPage').classList.remove('hidden');
+        }
+
+        // ==================== إدارة النوافذ المنبثقة ====================
+        function showModal(content) {
+            $('#modalContent').innerHTML = content;
+            $('#modal').style.display = 'flex';
+        }
+
+        function hideModal() {
+            $('#modal').style.display = 'none';
+        }
+
+        // ==================== نظام الإشعارات ====================
+        function addNotification(type, content, targetId = null) {
+            const notification = {
+                id: generateId('NOTIF'),
+                type: type,
+                content: content,
+                date: new Date().toISOString(),
+                read: false,
+                targetId: targetId
+            };
+            
+            state.notifications.unshift(notification);
+            saveState();
+            showNotificationPopup(notification);
+            updateNotificationBadge();
+        }
+
+        function showNotificationPopup(notification) {
+            const popup = $('#notificationPopup');
+            let icon = 'fas fa-bell';
+            let color = 'var(--secondary)';
+            
+            switch(notification.type) {
+                case 'like':
+                    icon = 'fas fa-heart';
+                    color = 'var(--danger)';
+                    break;
+                case 'comment':
+                    icon = 'fas fa-comment';
+                    color = 'var(--success)';
+                    break;
+                case 'booking':
+                    icon = 'fas fa-calendar-check';
+                    color = 'var(--primary)';
+                    break;
+                case 'message':
+                    icon = 'fas fa-envelope';
+                    color = 'var(--warning)';
+                    break;
+            }
+            
+            popup.innerHTML = `
+                <div style="display: flex; align-items: center; gap: 10px;">
+                    <i class="${icon}" style="color: ${color}; font-size: 20px;"></i>
+                    <div>
+                        <strong>${notification.content}</strong>
+                        <div style="font-size: 12px; color: #666;">${formatTime(notification.date)}</div>
+                    </div>
+                </div>
+            `;
+            
+            popup.style.display = 'block';
+            
+            setTimeout(() => {
+                popup.style.display = 'none';
+            }, 5000);
+            
+            if (state.settings.notificationSound) {
+                playNotificationSound();
+            }
+        }
+
+        function playNotificationSound() {
+            try {
+                const audioContext = new (window.AudioContext || window.webkitAudioContext)();
+                const oscillator = audioContext.createOscillator();
+                const gainNode = audioContext.createGain();
+                
+                oscillator.connect(gainNode);
+                gainNode.connect(audioContext.destination);
+                
+                oscillator.frequency.value = 800;
+                oscillator.type = 'sine';
+                
+                gainNode.gain.setValueAtTime(0, audioContext.currentTime);
+                gainNode.gain.linearRampToValueAtTime(0.1, audioContext.currentTime + 0.01);
+                gainNode.gain.linearRampToValueAtTime(0, audioContext.currentTime + 0.2);
+                
+                oscillator.start(audioContext.currentTime);
+                oscillator.stop(audioContext.currentTime + 0.2);
+            } catch (e) {
+                console.log('لا يمكن تشغيل صوت الإشعار:', e);
+            }
+        }
+
+        function updateNotificationBadge() {
+            const unreadCount = state.notifications.filter(n => !n.read).length;
+            const badgeElements = $$('.notification-badge');
+            
+            badgeElements.forEach(badge => {
+                badge.textContent = unreadCount > 0 ? unreadCount : '';
+                badge.style.display = unreadCount > 0 ? 'flex' : 'none';
+            });
+        }
+
+        function handleNotificationClick(notification) {
+            hideModal();
+            
+            switch(notification.type) {
+                case 'like':
+                case 'comment':
+                    showSection('community');
+                    break;
+                case 'booking':
+                    if (!state.isAdmin) {
+                        showSection('booking');
+                    }
+                    break;
+                case 'message':
+                    if (notification.targetId) {
+                        showMessageReplies(notification.targetId);
+                    } else {
+                        showNotifications();
+                    }
+                    break;
+                default:
+                    showNotifications();
+            }
+        }
+
+        function showNotifications() {
+            const unreadNotifications = state.notifications.filter(n => !n.read);
+            const allNotifications = state.notifications.slice(0, 20);
+            
+            showModal(`
+                <div class="card-title">الإشعارات ${unreadNotifications.length > 0 ? `(${unreadNotifications.length})` : ''}</div>
+                <div style="max-height: 400px; overflow-y: auto;">
+                    ${allNotifications.length > 0 ? allNotifications.map(notification => {
+                        let icon = 'fas fa-bell';
+                        let color = 'var(--secondary)';
+                        
+                        switch(notification.type) {
+                            case 'like':
+                                icon = 'fas fa-heart';
+                                color = 'var(--danger)';
+                                break;
+                            case 'comment':
+                                icon = 'fas fa-comment';
+                                color = 'var(--success)';
+                                break;
+                            case 'booking':
+                                icon = 'fas fa-calendar-check';
+                                color = 'var(--primary)';
+                                break;
+                            case 'message':
+                                icon = 'fas fa-envelope';
+                                color = 'var(--warning)';
+                                break;
+                        }
+                        
+                        return `
+                            <div class="notification-item ${!notification.read ? 'unread' : ''} notification-link" 
+                                 onclick="markNotificationAsRead('${notification.id}'); handleNotificationClick(${JSON.stringify(notification).replace(/'/g, "\\'")})">
+                                <div style="display: flex; align-items: flex-start; gap: 10px;">
+                                    <i class="${icon}" style="color: ${color}; margin-top: 3px;"></i>
+                                    <div style="flex: 1;">
+                                        <div>${notification.content}</div>
+                                        <div style="font-size: 12px; color: #666;">${formatDate(notification.date)} ${formatTime(notification.date)}</div>
+                                    </div>
+                                    ${!notification.read ? '<div style="width: 8px; height: 8px; background: var(--secondary); border-radius: 50%;"></div>' : ''}
+                                </div>
+                            </div>
+                        `;
+                    }).join('') : '<p style="text-align: center; padding: 20px; color: #666;">لا توجد إشعارات</p>'}
+                </div>
+                ${unreadNotifications.length > 0 ? `
+                    <div style="margin-top: 15px;">
+                        <button class="btn btn-primary btn-small" onclick="markAllNotificationsAsRead()">
+                            <i class="fas fa-check-double"></i> تعيين الكل كمقروء
+                        </button>
+                    </div>
+                ` : ''}
+                <div style="display: flex; gap: 10px; margin-top: 20px;">
+                    <button class="btn btn-secondary" onclick="hideModal()">إغلاق</button>
+                </div>
+            `);
+        }
+
+        function markNotificationAsRead(notificationId) {
+            const notification = state.notifications.find(n => n.id === notificationId);
+            if (notification) {
+                notification.read = true;
+                saveState();
+                updateNotificationBadge();
+                showNotifications();
+            }
+        }
+
+        function markAllNotificationsAsRead() {
+            state.notifications.forEach(notification => {
+                notification.read = true;
+            });
+            saveState();
+            updateNotificationBadge();
+            showNotifications();
+        }
+
+        // ==================== التهيئة الرئيسية ====================
+        function initializeApp() {
+            setupBottomNavigation();
+            showSection(state.currentSection);
+            updateDateTime();
+            setInterval(updateDateTime, 1000);
+            updateNotificationBadge();
+            
+            $('#modal').addEventListener('click', function(e) {
+                if (e.target === this) {
+                    hideModal();
+                }
+            });
+
+            if (state.settings.theme === 'dark') {
+                document.body.classList.add('dark-theme');
+            }
+
+            setupAutomaticBookingSystem();
+        }
+
+        function updateDateTime() {
+            const now = new Date();
+            const dateTimeStr = now.toLocaleDateString('ar-EG', {
+                weekday: 'long',
+                year: 'numeric',
+                month: 'long',
+                day: 'numeric'
+            }) + ' - ' + now.toLocaleTimeString('ar-EG');
+            
+            const datetimeElement = $('#datetime');
+            if (datetimeElement) {
+                datetimeElement.textContent = dateTimeStr;
+            }
+            
+            const hour = now.getHours();
+            let greeting = 'مساء الخير';
+            if (hour < 12) greeting = 'صباح الخير';
+            
+            const greetingElement = $('#greetingText');
+            if (greetingElement) {
+                const userName = state.isAdmin ? state.settings.adminName : (state.currentUser?.name || 'طالب');
+                greetingElement.textContent = `${greeting}، ${userName}`;
+            }
+        }
+
+        // ==================== التنقل والأقسام ====================
+        function setupBottomNavigation() {
+            const bottomNav = $('#bottomNav');
+            const navItems = state.isAdmin ? [
+                { id: 'admin', name: 'المشرف', icon: 'user-shield' },
+                { id: 'students', name: 'الطلاب', icon: 'user-graduate' },
+                { id: 'packages', name: 'الباقات', icon: 'box' },
+                { id: 'trips', name: 'الرحلات', icon: 'route' },
+                { id: 'booking', name: 'الحجز', icon: 'calendar-check' },
+                { id: 'reports', name: 'التقارير', icon: 'chart-bar' },
+                { id: 'community', name: 'المجتمع', icon: 'users' }
+            ] : [
+                { id: 'mypage', name: 'صفحتي', icon: 'user' },
+                { id: 'booking', name: 'الحجز', icon: 'calendar-check' },
+                { id: 'community', name: 'المجتمع', icon: 'users' },
+                { id: 'notes', name: 'المذكرات', icon: 'sticky-note' }
+            ];
+
+            bottomNav.innerHTML = navItems.map(item => `
+                <div class="nav-item" onclick="showSection('${item.id}')" id="nav-${item.id}">
+                    <i class="fas fa-${item.icon}"></i>
+                    <span>${item.name}</span>
+                </div>
+            `).join('');
+
+            activateNavItem(state.currentSection);
+        }
+
+        function activateNavItem(sectionId) {
+            $$('.nav-item').forEach(item => item.classList.remove('active'));
+            const activeItem = $(`#nav-${sectionId}`);
+            if (activeItem) {
+                activeItem.classList.add('active');
+            }
+        }
+
+        function showSection(sectionId) {
+            state.currentSection = sectionId;
+            activateNavItem(sectionId);
+            renderHeader();
+
+            const sections = {
+                'dashboard': showDashboard,
+                'admin': showAdminDashboard,
+                'students': showStudentsManagement,
+                'packages': showPackagesManagement,
+                'trips': showTripsManagement,
+                'booking': showBookingSystem,
+                'reports': showReports,
+                'community': showCommunity,
+                'mypage': showMyPage,
+                'notes': showNotes
+            };
+
+            if (sections[sectionId]) {
+                sections[sectionId]();
+            } else {
+                showDashboard();
+            }
+        }
+
+        // ==================== عرض الهيدر المعدل ====================
+        function renderHeader() {
+            if (state.isAdmin) {
+                renderAdminHeader();
+            } else {
+                renderStudentHeader();
+            }
+            updateDateTime();
+            updateNotificationBadge();
+        }
+
+        function renderAdminHeader() {
+            const profile = state.viewingProfile || state.adminProfile;
+            const isViewingOthers = state.viewingProfile && state.viewingProfile.id !== 'admin';
+            const unreadCount = state.notifications.filter(n => !n.read).length;
+            
+            $('#mainHeader').innerHTML = `
+                <div class="profile-header" style="${profile.coverPhoto ? `background-image: url('${profile.coverPhoto}')` : 'background: linear-gradient(135deg, var(--primary), var(--secondary))'}">
+                    <div class="profile-actions">
+                        <div class="dropdown">
+                            <button class="btn btn-secondary btn-small" style="position: relative;">
+                                <i class="fas fa-bell"></i>
+                                ${unreadCount > 0 ? `<span class="notification-badge">${unreadCount}</span>` : ''}
+                            </button>
+                            <div class="dropdown-content">
+                                <button class="dropdown-item" onclick="showNotifications()">
+                                    <i class="fas fa-bell"></i> الإشعارات ${unreadCount > 0 ? `(${unreadCount})` : ''}
+                                </button>
+                                ${renderAdminDropdown()}
+                            </div>
+                        </div>
+                        ${isViewingOthers ? `
+                            <button class="btn btn-secondary btn-small" onclick="backToProfile()">
+                                <i class="fas fa-arrow-left"></i> رجوع
+                            </button>
+                        ` : ''}
+                    </div>
+                    <div class="profile-picture">
+                        <img src="${profile.profilePhoto || 'https://via.placeholder.com/70x90/3498db/FFFFFF?text=ص'}" alt="الصورة الشخصية">
+                    </div>
+                </div>
+                <div class="company-info">
+                    ${state.company.logo ? `
+                        <div class="company-logo">
+                            <img src="${state.company.logo}" alt="شعار النظام">
+                        </div>
+                    ` : `
+                        <div class="company-logo">
+                            <i class="fas fa-bus"></i>
+                        </div>
+                    `}
+                    <div class="welcome-message">
+                        <h2 id="companyName">${state.company.name}</h2>
+                        <p id="greetingText"></p>
+                        <p id="datetime"></p>
+                    </div>
+                </div>
+                ${state.currentSection === 'admin' ? `
+                    <div class="header-actions">
+                        <button class="btn btn-success btn-small" onclick="showAddPostForm()">
+                            <i class="fas fa-plus"></i> منشور جديد
+                        </button>
+                        <button class="btn btn-warning btn-small" onclick="showAddNoteForm()">
+                            <i class="fas fa-sticky-note"></i> مذكرة
+                        </button>
+                    </div>
+                ` : ''}
+            `;
+        }
+
+        function renderStudentHeader() {
+            const profile = state.viewingProfile || state.currentUser;
+            const isViewingOthers = state.viewingProfile && state.viewingProfile.id !== state.currentUser?.id;
+            const packageInfo = state.packages.find(p => p.id === profile.packageId) || {};
+            const unreadCount = state.notifications.filter(n => !n.read).length;
+            
+            $('#mainHeader').innerHTML = `
+                <div class="profile-header" style="${profile.coverPhoto ? `background-image: url('${profile.coverPhoto}')` : 'background: #f0f0f0'}">
+                    <div class="profile-actions">
+                        <div class="dropdown">
+                            <button class="btn btn-secondary btn-small" style="position: relative;">
+                                <i class="fas fa-bell"></i>
+                                ${unreadCount > 0 ? `<span class="notification-badge">${unreadCount}</span>` : ''}
+                            </button>
+                            <div class="dropdown-content">
+                                <button class="dropdown-item" onclick="showNotifications()">
+                                    <i class="fas fa-bell"></i> الإشعارات ${unreadCount > 0 ? `(${unreadCount})` : ''}
+                                </button>
+                                ${renderStudentDropdown()}
+                            </div>
+                        </div>
+                        ${isViewingOthers ? `
+                            <button class="btn btn-secondary btn-small" onclick="backToProfile()">
+                                <i class="fas fa-arrow-left"></i> رجوع
+                            </button>
+                        ` : ''}
+                    </div>
+                    <div class="profile-picture">
+                        <img src="${profile.profilePhoto || 'https://via.placeholder.com/70x90/3498db/FFFFFF?text=ص'}" alt="الصورة الشخصية">
+                    </div>
+                </div>
+                <div class="student-info-panel">
+                    <div class="student-details">
+                        <h2>${profile.name}</h2>
+                        <p>المعرف: ${profile.id}</p>
+                        <p>الهاتف: ${profile.phone}</p>
+                        <p>الباقة: ${packageInfo.name || 'غير محدد'}</p>
+                        <p>الرحلات المتبقية: ${profile.rides || 0}</p>
+                    </div>
+                    <div class="student-actions">
+                        <button class="btn btn-primary btn-small" onclick="showAddPostForm()">
+                            <i class="fas fa-plus"></i> نشر
+                        </button>
+                        <button class="btn btn-warning btn-small" onclick="showAddNoteForm()">
+                            <i class="fas fa-sticky-note"></i> مذكرات
+                        </button>
+                        <button class="btn btn-success btn-small" onclick="showMessageToAdminForm()">
+                            <i class="fas fa-envelope"></i> ملاحظة
+                        </button>
+                    </div>
+                </div>
+            `;
+        }
+
+        function renderAdminDropdown() {
+            return `
+                <button class="dropdown-item" onclick="showSystemSettings()">
+                    <i class="fas fa-cog"></i> إعدادات النظام
+                </button>
+                <button class="dropdown-item" onclick="toggleDarkMode()">
+                    <i class="fas fa-moon"></i> الوضع الداكن
+                </button>
+                <button class="dropdown-item" onclick="showAdminProfileSettings()">
+                    <i class="fas fa-user-cog"></i> إعدادات المشرف
+                </button>
+                <button class="dropdown-item" onclick="showAboutSystem()">
+                    <i class="fas fa-info-circle"></i> حول النظام
+                </button>
+                <button class="dropdown-item" onclick="showVersionInfo()">
+                    <i class="fas fa-code-branch"></i> الإصدار
+                </button>
+                <button class="dropdown-item" onclick="saveData()">
+                    <i class="fas fa-save"></i> تخزين البيانات
+                </button>
+                <button class="dropdown-item" onclick="restoreData()">
+                    <i class="fas fa-upload"></i> استعادة البيانات
+                </button>
+                <button class="dropdown-item" onclick="changeAdminPassword()">
+                    <i class="fas fa-key"></i> تغيير كلمة المرور
+                </button>
+                <button class="dropdown-item" onclick="resetSystem()" style="color: var(--danger);">
+                    <i class="fas fa-trash"></i> تصفير النظام
+                </button>
+                <button class="dropdown-item" onclick="logout()" style="color: var(--danger);">
+                    <i class="fas fa-sign-out-alt"></i> إنهاء
+                </button>
+            `;
+        }
+
+        function renderStudentDropdown() {
+            return `
+                <button class="dropdown-item" onclick="showStudentProfileSettings()">
+                    <i class="fas fa-user-edit"></i> تعديل الملف الشخصي
+                </button>
+                <button class="dropdown-item" onclick="toggleDarkMode()">
+                    <i class="fas fa-moon"></i> الوضع الداكن
+                </button>
+                <button class="dropdown-item" onclick="createStudentPassword()">
+                    <i class="fas fa-key"></i> إنشاء كلمة مرور
+                </button>
+                <button class="dropdown-item" onclick="showAboutSystem()">
+                    <i class="fas fa-info-circle"></i> حول النظام
+                </button>
+                <button class="dropdown-item" onclick="showVersionInfo()">
+                    <i class="fas fa-code-branch"></i> الإصدار
+                </button>
+                <button class="dropdown-item" onclick="logout()" style="color: var(--danger);">
+                    <i class="fas fa-sign-out-alt"></i> إنهاء
+                </button>
+            `;
+        }
+
+        function backToProfile() {
+            state.viewingProfile = null;
+            showSection(state.isAdmin ? 'admin' : 'mypage');
+        }
+
+        // ==================== نظام الباركود الجديد ====================
+        function generateQRCode(studentId, containerId) {
+            const container = document.getElementById(containerId);
+            if (!container) return;
+            
+            container.innerHTML = '';
+            
+            const qrData = JSON.stringify({
+                studentId: studentId,
+                system: 'StudentTransport',
+                timestamp: new Date().getTime()
+            });
+            
+            new QRCode(container, {
+                text: qrData,
+                width: 150,
+                height: 150,
+                colorDark: "#000000",
+                colorLight: "#ffffff",
+                correctLevel: QRCode.CorrectLevel.H
+            });
+        }
+
+        function printStudentCard(studentId) {
+            const student = state.students.find(s => s.id === studentId);
+            if (!student) return;
+
+            const packageInfo = state.packages.find(p => p.id === student.packageId) || {};
+            const printWindow = window.open('', '_blank');
+            
+            printWindow.document.write(`
+                <!DOCTYPE html>
+                <html dir="rtl">
+                <head>
+                    <title>بطاقة الطالب - ${student.name}</title>
+                    <style>
+                        body { 
+                            font-family: Arial, sans-serif; 
+                            text-align: center; 
+                            padding: 20px;
+                            direction: rtl;
+                        }
+                        .card { 
+                            border: 2px solid #333; 
+                            padding: 20px; 
+                            max-width: 400px; 
+                            margin: 0 auto;
+                            border-radius: 10px;
+                        }
+                        .student-photo {
+                            width: 120px;
+                            height: 160px;
+                            border-radius: 5px;
+                            margin: 10px auto;
+                            border: 2px solid #333;
+                            overflow: hidden;
+                        }
+                        .student-photo img {
+                            width: 100%;
+                            height: 100%;
+                            object-fit: cover;
+                        }
+                        .qrcode {
+                            margin: 15px auto;
+                            display: inline-block;
+                        }
+                        .info { 
+                            margin: 10px 0; 
+                            text-align: right;
+                        }
+                        @media print {
+                            body { margin: 0; padding: 10px; }
+                            .no-print { display: none; }
+                        }
+                    </style>
+                </head>
+                <body>
+                    <div class="card">
+                        <h2>بطاقة الطالب</h2>
+                        <div class="student-photo">
+                            <img src="${student.profilePhoto || 'https://via.placeholder.com/120x160/3498db/FFFFFF?text=ص'}" alt="صورة الطالب">
+                        </div>
+                        <div class="info"><strong>الاسم:</strong> ${student.name}</div>
+                        <div class="info"><strong>المعرف:</strong> ${student.id}</div>
+                        <div class="info"><strong>الباقة:</strong> ${packageInfo.name || 'غير محدد'}</div>
+                        <div class="info"><strong>المسار:</strong> ${student.route || 'غير محدد'}</div>
+                        <div id="qrcode" class="qrcode"></div>
+                        <div class="no-print">
+                            <button onclick="window.print()">طباعة البطاقة</button>
+                            <button onclick="window.close()">إغلاق</button>
+                        </div>
+                    </div>
+                    <script src="https://cdn.jsdelivr.net/gh/davidshimjs/qrcodejs@gh-pages/qrcode.min.js"><\/script>
+                    <script>
+                        setTimeout(() => {
+                            new QRCode(document.getElementById('qrcode'), {
+                                text: '${JSON.stringify({
+                                    studentId: student.id,
+                                    system: 'StudentTransport',
+                                    timestamp: new Date().getTime()
+                                }).replace(/'/g, "\\'")}',
+                                width: 120,
+                                height: 120,
+                                colorDark: "#000000",
+                                colorLight: "#ffffff",
+                                correctLevel: QRCode.CorrectLevel.H
+                            });
+                        }, 100);
+                    <\/script>
+                </body>
+                </html>
+            `);
+            
+            printWindow.document.close();
+        }
+
+        // ==================== نظام الحجز المحسن ====================
+        function showBookingSystem() {
+            $('#appContent').innerHTML = `
+                <div class="card">
+                    <div class="card-title">نظام الحجز</div>
+                    <div style="display: flex; gap: 10px; flex-wrap: wrap; margin-bottom: 20px;">
+                        <button class="btn btn-primary" onclick="showDailyBooking()">
+                            <i class="fas fa-calendar-day"></i> الحجز اليومي
+                        </button>
+                        <button class="btn btn-secondary" onclick="showWeeklyBookingSystem()">
+                            <i class="fas fa-calendar-week"></i> الحجز الأسبوعي
+                        </button>
+                    </div>
+                    <div id="bookingContent">
+                        ${renderDailyBooking()}
+                    </div>
+                </div>
+            `;
+        }
+
+        function showDailyBooking() {
+            $('#bookingContent').innerHTML = renderDailyBooking();
+        }
+
+        function renderDailyBooking() {
+            return `
+                <div class="booking-tabs">
+                    <div class="booking-tab active" id="tabDeparture" onclick="showBookingTable('departure')">
+                        <i class="fas fa-arrow-up"></i> جدول الذهاب
+                    </div>
+                    <div class="booking-tab" id="tabReturn" onclick="showBookingTable('return')">
+                        <i class="fas fa-arrow-down"></i> جدول الإياب
+                    </div>
+                </div>
+                <div id="bookingContainer">
+                    ${renderBookingTable('departure')}
+                </div>
+            `;
+        }
+
+        function showWeeklyBookingSystem() {
+            const today = new Date().getDay();
+            const dayNames = {
+                0: 'sunday', 1: 'monday', 2: 'tuesday', 3: 'wednesday', 
+                4: 'thursday', 5: 'friday', 6: 'saturday'
+            };
+            const currentDay = dayNames[today];
+            
+            $('#bookingContent').innerHTML = `
+                <div class="weekly-booking">
+                    ${state.bookings.weeklyClosed ? `
+                        <div style="background: var(--danger); color: white; padding: 10px; border-radius: 8px; margin-bottom: 15px; text-align: center;">
+                            <i class="fas fa-lock"></i> الحجز الأسبوعي مغلق حالياً
+                        </div>
+                    ` : ''}
+                    <div class="booking-tabs">
+                        <div class="booking-tab active" id="weeklyTabDeparture" onclick="showWeeklyBookingTable('departure')">
+                            <i class="fas fa-arrow-up"></i> جدول الذهاب الأسبوعي
+                        </div>
+                        <div class="booking-tab" id="weeklyTabReturn" onclick="showWeeklyBookingTable('return')">
+                            <i class="fas fa-arrow-down"></i> جدول الإياب الأسبوعي
+                        </div>
+                    </div>
+                    <div class="day-selector">
+                        ${Object.entries({
+                            'saturday': 'السبت',
+                            'sunday': 'الأحد',
+                            'monday': 'الإثنين', 
+                            'tuesday': 'الثلاثاء',
+                            'wednesday': 'الأربعاء',
+                            'thursday': 'الخميس'
+                        }).map(([dayKey, dayName]) => {
+                            const isActiveDay = state.weeklySchedule.includes(dayKey);
+                            const isToday = currentDay === dayKey;
+                            return `
+                                <div class="day-btn ${isToday ? 'active' : ''} ${!isActiveDay ? 'closed' : ''}" 
+                                     onclick="selectWeeklyDay('${dayKey}')" 
+                                     title="${!isActiveDay ? 'غير متوفر هذا اليوم' : ''}">
+                                    ${dayName} ${isToday ? '(اليوم)' : ''}
+                                </div>
+                            `;
+                        }).join('')}
+                    </div>
+                    <div id="weeklyBookingContainer">
+                        ${renderWeeklyBookingTable('departure', 'saturday')}
+                    </div>
+                    ${state.isAdmin ? `
+                        <div style="margin-top: 15px; display: flex; gap: 10px; flex-wrap: wrap;">
+                            <button class="btn ${state.bookings.weeklyClosed ? 'btn-success' : 'btn-warning'}" 
+                                    onclick="toggleWeeklyBooking()">
+                                <i class="fas ${state.bookings.weeklyClosed ? 'fa-unlock' : 'fa-lock'}"></i> 
+                                ${state.bookings.weeklyClosed ? 'فتح الحجز الأسبوعي' : 'إغلاق الحجز الأسبوعي'}
+                            </button>
+                            <button class="btn btn-primary" onclick="applyWeeklyToDaily()">
+                                <i class="fas fa-sync"></i> تطبيق الحجز الأسبوعي على اليومي
+                            </button>
+                        </div>
+                    ` : ''}
+                </div>
+            `;
+            
+            selectWeeklyDay(currentDay);
+        }
+
+        function showBookingTable(type) {
+            $$('.booking-tab').forEach(tab => tab.classList.remove('active'));
+            $(`#tab${type.charAt(0).toUpperCase() + type.slice(1)}`).classList.add('active');
+            
+            $('#bookingContainer').innerHTML = renderBookingTable(type);
+        }
+
+        function renderBookingTable(type) {
+            const isDeparture = type === 'departure';
+            const hours = isDeparture ? [7, 8, 9, 10, 11] : [13, 14, 15, 16, 17];
+            const tableData = state.bookings[type];
+            const currentStudentId = state.currentUser ? state.currentUser.id : null;
+            
+            const now = new Date();
+            const currentHour = now.getHours();
+            const currentMinutes = now.getMinutes();
+            
+            let isBookingOpen = false;
+            if (isDeparture) {
+                isBookingOpen = (currentHour >= 18 || currentHour < 5);
+            } else {
+                isBookingOpen = (currentHour >= 18 || (currentHour < 12 || (currentHour === 12 && currentMinutes <= 30)));
+            }
+
+            let tableHTML = `
+                <div class="card-title">جدول حجز ${isDeparture ? 'الذهاب (صباحاً)' : 'الإياب (مساءً)'}</div>
+                ${!isBookingOpen && !state.isAdmin ? `
+                    <div style="background: var(--danger); color: white; padding: 10px; border-radius: 8px; margin-bottom: 15px; text-align: center;">
+                        <i class="fas fa-exclamation-triangle"></i> 
+                        ${isDeparture ? 
+                            'الحجز متاح من الساعة 6:00 مساءً حتى 5:00 صباحاً' : 
+                            'الحجز متاح من الساعة 6:00 مساءً حتى 12:30 ظهراً'
+                        }
+                    </div>
+                ` : ''}
+                <div class="table-container">
+                    <table class="booking-table">
+                        <thead>
+                            <tr>
+                                <th class="time-label" style="width: 60px;">الصف</th>
+                                ${hours.map(hour => `<th class="time-label">${hour}:00</th>`).join('')}
+                            </tr>
+                        </thead>
+                        <tbody>
+            `;
+
+            for (let row = 1; row <= 30; row++) {
+                tableHTML += '<tr>';
+                tableHTML += `<td class="time-label" style="font-weight: bold;">${row}</td>`;
+                
+                hours.forEach(hour => {
+                    const key = `${row}_${hour}`;
+                    const bookedStudentId = tableData[key];
+                    const isBooked = !!bookedStudentId;
+                    const isMine = bookedStudentId === currentStudentId;
+                    
+                    let cellClass = 'booking-cell';
+                    let cellText = 'حجز';
+                    let onClick = '';
+                    
+                    if (isBooked) {
+                        const student = state.students.find(s => s.id === bookedStudentId);
+                        cellText = isMine ? 'حجزك' : (state.isAdmin ? (student ? student.name : 'محجوز') : 'محجوز');
+                        
+                        if (isMine) {
+                            cellClass += ' mine';
+                            if (isBookingOpen || state.isAdmin) {
+                                onClick = `cancelBooking('${type}', ${row}, ${hour})`;
+                            } else {
+                                cellClass += ' closed';
+                                onClick = 'alert("لا يمكن إلغاء الحجز خارج أوقات الحجز")';
+                            }
+                        } else if (state.isAdmin) {
+                            cellClass += ' booked';
+                            onClick = `adminCancelBooking('${type}', ${row}, ${hour})`;
+                        } else {
+                            cellClass += ' booked';
+                            onClick = 'alert("هذا المقعد محجوز")';
+                        }
+                    } else {
+                        if (isBookingOpen || state.isAdmin) {
+                            const canBook = canBookInDailyRow(type, row, hour);
+                            
+                            if (canBook) {
+                                cellClass += ' available';
+                                onClick = `bookSlot('${type}', ${row}, ${hour})`;
+                            } else {
+                                cellClass += ' disabled';
+                                cellText = 'غير متاح';
+                                onClick = 'alert("لا يمكن الحجز في هذا الصف قبل اكتمال الصفوف السابقة")';
+                            }
+                        } else {
+                            cellClass += ' disabled';
+                            onClick = 'alert("الحجز غير متاح حالياً")';
+                        }
+                    }
+
+                    tableHTML += `<td class="${cellClass}" onclick="${onClick}">${cellText}</td>`;
+                });
+                
+                tableHTML += '</tr>';
+            }
+
+            tableHTML += '</tbody></table></div>';
+            
+            tableHTML += `
+                <div style="margin-top: 15px; padding: 10px; background: var(--light); border-radius: 8px; font-size: 12px;">
+                    <p><strong>معلومات الحجز:</strong></p>
+                    <p>${isDeparture ? 
+                        '• جدول الذهاب يصفر يومياً عند الساعة 12:00 ظهراً' : 
+                        '• جدول الإياب يصفر يومياً عند الساعة 6:00 مساءً'
+                    }</p>
+                    <p>${isDeparture ? 
+                        '• الحجز متاح من الساعة 6:00 مساءً حتى 5:00 صباحاً' : 
+                        '• الحجز متاح من الساعة 6:00 مساءً حتى 12:30 ظهراً'
+                    }</p>
+                </div>
+            `;
+            
+            return tableHTML;
+        }
+
+        function selectWeeklyDay(dayKey) {
+            $$('.day-btn').forEach(btn => btn.classList.remove('active'));
+            $(`.day-btn:nth-child(${Object.keys({
+                'saturday': 'السبت',
+                'sunday': 'الأحد',
+                'monday': 'الإثنين', 
+                'tuesday': 'الثلاثاء',
+                'wednesday': 'الأربعاء',
+                'thursday': 'الخميس'
+            }).indexOf(dayKey) + 1})`).classList.add('active');
+            
+            const activeTab = $('.booking-tab.active').id;
+            const type = activeTab.includes('Departure') ? 'departure' : 'return';
+            $('#weeklyBookingContainer').innerHTML = renderWeeklyBookingTable(type, dayKey);
+        }
+
+        function showWeeklyBookingTable(type) {
+            $$('.booking-tab').forEach(tab => tab.classList.remove('active'));
+            $(`#weeklyTab${type.charAt(0).toUpperCase() + type.slice(1)}`).classList.add('active');
+            
+            const activeDay = $('.day-btn.active');
+            const dayIndex = Array.from($$('.day-btn')).indexOf(activeDay);
+            const dayKeys = ['saturday', 'sunday', 'monday', 'tuesday', 'wednesday', 'thursday'];
+            const dayKey = dayKeys[dayIndex];
+            
+            $('#weeklyBookingContainer').innerHTML = renderWeeklyBookingTable(type, dayKey);
+        }
+
+        function renderWeeklyBookingTable(type, dayKey) {
+            const isDeparture = type === 'departure';
+            const hours = isDeparture ? [7, 8, 9, 10, 11] : [13, 14, 15, 16, 17];
+            const tableData = state.bookings.weekly[dayKey]?.[type] || {};
+            const currentStudentId = state.currentUser ? state.currentUser.id : null;
+            const isActiveDay = state.weeklySchedule.includes(dayKey);
+            
+            let tableHTML = `
+                <div class="card-title">جدول حجز ${isDeparture ? 'الذهاب' : 'الإياب'} ليوم ${getArabicDayName(dayKey)}</div>
+                ${!isActiveDay ? `
+                    <div style="background: var(--danger); color: white; padding: 10px; border-radius: 8px; margin-bottom: 15px; text-align: center;">
+                        <i class="fas fa-exclamation-triangle"></i> لا يوجد دوام في هذا اليوم
+                    </div>
+                ` : state.bookings.weeklyClosed && !state.isAdmin ? `
+                    <div style="background: var(--danger); color: white; padding: 10px; border-radius: 8px; margin-bottom: 15px; text-align: center;">
+                        <i class="fas fa-lock"></i> الحجز الأسبوعي مغلق حالياً
+                    </div>
+                ` : ''}
+                <div class="table-container">
+                    <table class="booking-table">
+                        <thead>
+                            <tr>
+                                <th class="time-label" style="width: 60px;">الصف</th>
+                                ${hours.map(hour => `<th class="time-label">${hour}:00</th>`).join('')}
+                            </tr>
+                        </thead>
+                        <tbody>
+            `;
+
+            for (let row = 1; row <= 30; row++) {
+                tableHTML += '<tr>';
+                tableHTML += `<td class="time-label" style="font-weight: bold;">${row}</td>`;
+                
+                hours.forEach(hour => {
+                    const key = `${row}_${hour}`;
+                    const bookedStudentId = tableData[key];
+                    const isBooked = !!bookedStudentId;
+                    const isMine = bookedStudentId === currentStudentId;
+                    
+                    let cellClass = 'booking-cell';
+                    let cellText = 'حجز';
+                    let onClick = '';
+                    
+                    if (isBooked) {
+                        const student = state.students.find(s => s.id === bookedStudentId);
+                        cellText = isMine ? 'حجزك' : (state.isAdmin ? (student ? student.name : 'محجوز') : 'محجوز');
+                        
+                        if (isMine) {
+                            cellClass += ' mine';
+                            if (!state.bookings.weeklyClosed || state.isAdmin) {
+                                onClick = `cancelWeeklyBooking('${type}', '${dayKey}', ${row}, ${hour})`;
+                            } else {
+                                cellClass += ' closed';
+                                onClick = 'alert("لا يمكن إلغاء الحجز بعد إغلاق الحجز الأسبوعي")';
+                            }
+                        } else if (state.isAdmin) {
+                            cellClass += ' booked';
+                            onClick = `adminCancelWeeklyBooking('${type}', '${dayKey}', ${row}, ${hour})`;
+                        } else {
+                            cellClass += ' booked';
+                            onClick = 'alert("هذا المقعد محجوز")';
+                        }
+                    } else {
+                        if ((isActiveDay && !state.bookings.weeklyClosed) || state.isAdmin) {
+                            const canBook = canBookInRow(type, dayKey, row, hour);
+                            
+                            if (canBook) {
+                                cellClass += ' available';
+                                onClick = `bookWeeklySlot('${type}', '${dayKey}', ${row}, ${hour})`;
+                            } else {
+                                cellClass += ' disabled';
+                                cellText = 'غير متاح';
+                                onClick = 'alert("لا يمكن الحجز في هذا الصف قبل اكتمال الصفوف السابقة")';
+                            }
+                        } else {
+                            cellClass += ' disabled';
+                            onClick = 'alert("الحجز غير متاح حالياً")';
+                        }
+                    }
+
+                    tableHTML += `<td class="${cellClass}" onclick="${onClick}">${cellText}</td>`;
+                });
+                
+                tableHTML += '</tr>';
+            }
+
+            tableHTML += '</tbody></table></div>';
+            
+            return tableHTML;
+        }
+
+        function getArabicDayName(dayKey) {
+            const days = {
+                'saturday': 'السبت',
+                'sunday': 'الأحد',
+                'monday': 'الإثنين',
+                'tuesday': 'الثلاثاء',
+                'wednesday': 'الأربعاء',
+                'thursday': 'الخميس'
+            };
+            return days[dayKey] || dayKey;
+        }
+
+        function canBookInRow(type, dayKey, row, hour) {
+            if (row === 1) return true;
+            
+            const tableData = state.bookings.weekly[dayKey]?.[type] || {};
+            
+            for (let prevRow = 1; prevRow < row; prevRow++) {
+                const prevKey = `${prevRow}_${hour}`;
+                if (!tableData[prevKey]) {
+                    return false;
+                }
+            }
+            
+            return true;
+        }
+
+        function canBookInDailyRow(type, row, hour) {
+            if (row === 1) return true;
+            
+            const tableData = state.bookings[type];
+            
+            for (let prevRow = 1; prevRow < row; prevRow++) {
+                const prevKey = `${prevRow}_${hour}`;
+                if (!tableData[prevKey]) {
+                    return false;
+                }
+            }
+            
+            return true;
+        }
+
+        function bookSlot(type, row, hour) {
+            if (!state.currentUser && !state.isAdmin) {
+                alert('يجب تسجيل الدخول كطالب للحجز');
+                return;
+            }
+
+            if (state.isAdmin) {
+                alert('المشرف لا يمكنه الحجز');
+                return;
+            }
+
+            const tableData = state.bookings[type];
+            const existingBooking = Object.keys(tableData).find(key => tableData[key] === state.currentUser.id);
+            if (existingBooking) {
+                alert('لديك حجز مسبق في هذا الجدول. يمكنك الحجز مرة واحدة فقط في كل جدول.');
+                return;
+            }
+
+            const key = `${row}_${hour}`;
+            tableData[key] = state.currentUser.id;
+            
+            state.bookingLog.push({
+                id: generateId('BOOK'),
+                studentId: state.currentUser.id,
+                studentName: state.currentUser.name,
+                type: type,
+                row: row,
+                timeSlot: `${hour}:00`,
+                action: 'Book',
+                date: new Date().toISOString()
+            });
+
+            // إرسال إشعار واحد فقط للطالب
+            if (!state.isAdmin) {
+                addNotification('booking', `تم حجز مقعد في جدول ${type === 'departure' ? 'الذهاب' : 'الإياب'} - الصف ${row} الساعة ${hour}:00`);
+            }
+
+            saveState();
+            showBookingSystem();
+            alert(`تم حجز المقعد بنجاح! الصف ${row} - الساعة ${hour}:00`);
+        }
+
+        function cancelBooking(type, row, hour) {
+            if (!confirm('هل تريد إلغاء هذا الحجز؟')) {
+                return;
+            }
+
+            const tableData = state.bookings[type];
+            const key = `${row}_${hour}`;
+            delete tableData[key];
+
+            state.bookingLog.push({
+                id: generateId('BOOK'),
+                studentId: state.currentUser.id,
+                studentName: state.currentUser.name,
+                type: type,
+                row: row,
+                timeSlot: `${hour}:00`,
+                action: 'Cancel',
+                date: new Date().toISOString()
+            });
+
+            saveState();
+            showBookingSystem();
+            alert('تم إلغاء الحجز بنجاح');
+        }
+
+        function adminCancelBooking(type, row, hour) {
+            const tableData = state.bookings[type];
+            const key = `${row}_${hour}`;
+            const studentId = tableData[key];
+            
+            if (studentId && confirm('هل تريد إلغاء هذا الحجز؟')) {
+                delete tableData[key];
+                
+                const student = state.students.find(s => s.id === studentId);
+                state.bookingLog.push({
+                    id: generateId('BOOK'),
+                    studentId: studentId,
+                    studentName: student ? student.name : 'غير معروف',
+                    type: type,
+                    row: row,
+                    timeSlot: `${hour}:00`,
+                    action: 'Cancel',
+                    date: new Date().toISOString(),
+                    adminAction: true
+                });
+
+                saveState();
+                showBookingSystem();
+                alert('تم إلغاء الحجز بنجاح');
+            }
+        }
+
+        function bookWeeklySlot(type, dayKey, row, hour) {
+            if (!state.currentUser && !state.isAdmin) {
+                alert('يجب تسجيل الدخول كطالب للحجز');
+                return;
+            }
+
+            if (state.isAdmin) {
+                alert('المشرف لا يمكنه الحجز');
+                return;
+            }
+
+            if (state.bookings.weeklyClosed) {
+                alert('الحجز الأسبوعي مغلق حالياً');
+                return;
+            }
+
+            const tableData = state.bookings.weekly[dayKey][type];
+            const existingBooking = Object.keys(tableData).find(key => tableData[key] === state.currentUser.id);
+            if (existingBooking) {
+                alert('لديك حجز مسبق في هذا الجدول. يمكنك الحجز مرة واحدة فقط في كل جدول.');
+                return;
+            }
+
+            const key = `${row}_${hour}`;
+            state.bookings.weekly[dayKey][type][key] = state.currentUser.id;
+            
+            state.bookingLog.push({
+                id: generateId('BOOK'),
+                studentId: state.currentUser.id,
+                studentName: state.currentUser.name,
+                type: 'weekly_' + type,
+                day: dayKey,
+                row: row,
+                timeSlot: `${hour}:00`,
+                action: 'Book',
+                date: new Date().toISOString()
+            });
+
+            addNotification('booking', `تم حجز مقعد في جدول ${type === 'departure' ? 'الذهاب' : 'الإياب'} ليوم ${getArabicDayName(dayKey)}`);
+
+            saveState();
+            showBookingSystem();
+            alert(`تم حجز المقعد بنجاح! الصف ${row} - الساعة ${hour}:00 - يوم ${getArabicDayName(dayKey)}`);
+        }
+
+        function cancelWeeklyBooking(type, dayKey, row, hour) {
+            if (!confirm('هل تريد إلغاء هذا الحجز؟')) {
+                return;
+            }
+
+            const tableData = state.bookings.weekly[dayKey][type];
+            const key = `${row}_${hour}`;
+            delete tableData[key];
+
+            state.bookingLog.push({
+                id: generateId('BOOK'),
+                studentId: state.currentUser.id,
+                studentName: state.currentUser.name,
+                type: 'weekly_' + type,
+                day: dayKey,
+                row: row,
+                timeSlot: `${hour}:00`,
+                action: 'Cancel',
+                date: new Date().toISOString()
+            });
+
+            saveState();
+            showBookingSystem();
+            alert('تم إلغاء الحجز بنجاح');
+        }
+
+        function adminCancelWeeklyBooking(type, dayKey, row, hour) {
+            const tableData = state.bookings.weekly[dayKey][type];
+            const key = `${row}_${hour}`;
+            const studentId = tableData[key];
+            
+            if (studentId && confirm('هل تريد إلغاء هذا الحجز؟')) {
+                delete tableData[key];
+                
+                const student = state.students.find(s => s.id === studentId);
+                state.bookingLog.push({
+                    id: generateId('BOOK'),
+                    studentId: studentId,
+                    studentName: student ? student.name : 'غير معروف',
+                    type: 'weekly_' + type,
+                    day: dayKey,
+                    row: row,
+                    timeSlot: `${hour}:00`,
+                    action: 'Cancel',
+                    date: new Date().toISOString(),
+                    adminAction: true
+                });
+
+                saveState();
+                showBookingSystem();
+                alert('تم إلغاء الحجز بنجاح');
+            }
+        }
+
+        function toggleWeeklyBooking() {
+            state.bookings.weeklyClosed = !state.bookings.weeklyClosed;
+            saveState();
+            showBookingSystem();
+            alert(`تم ${state.bookings.weeklyClosed ? 'إغلاق' : 'فتح'} الحجز الأسبوعي بنجاح`);
+        }
+
+        function applyWeeklyToDaily() {
+            const today = new Date();
+            const dayNames = ['sunday', 'monday', 'tuesday', 'wednesday', 'thursday', 'friday', 'saturday'];
+            const todayKey = dayNames[today.getDay()];
+            
+            if (!state.weeklySchedule.includes(todayKey)) {
+                alert('لا يوجد دوام اليوم، لا يمكن تطبيق الحجز الأسبوعي');
+                return;
+            }
+            
+            if (confirm('هل تريد تطبيق الحجز الأسبوعي على الجدول اليومي؟')) {
+                state.bookings.departure = { ...state.bookings.weekly[todayKey].departure };
+                state.bookings.return = { ...state.bookings.weekly[todayKey].return };
+                
+                saveState();
+                alert('تم تطبيق الحجز الأسبوعي على الجدول اليومي بنجاح');
+            }
+        }
+
+        // ==================== نظام الحجز التلقائي ====================
+        function setupAutomaticBookingSystem() {
+            const now = new Date();
+            const currentHour = now.getHours();
+            
+            if (currentHour === 18) {
+                applyWeeklyToDailyAutomatically();
+            }
+            
+            setInterval(() => {
+                const now = new Date();
+                const currentHour = now.getHours();
+                
+                if (currentHour === 18) {
+                    applyWeeklyToDailyAutomatically();
+                }
+                
+                clearExpiredBookings();
+            }, 3600000);
+        }
+
+        function applyWeeklyToDailyAutomatically() {
+            const today = new Date();
+            const dayNames = ['sunday', 'monday', 'tuesday', 'wednesday', 'thursday', 'friday', 'saturday'];
+            const todayKey = dayNames[today.getDay()];
+            
+            if (state.weeklySchedule.includes(todayKey)) {
+                const mergedDeparture = { ...state.bookings.weekly[todayKey].departure, ...state.bookings.departure };
+                const mergedReturn = { ...state.bookings.weekly[todayKey].return, ...state.bookings.return };
+                
+                state.bookings.departure = mergedDeparture;
+                state.bookings.return = mergedReturn;
+                
+                saveState();
+                console.log('✅ تم تطبيق الحجز الأسبوعي على الجدول اليومي تلقائياً');
+            }
+        }
+
+        function clearExpiredBookings() {
+            const now = new Date();
+            const currentHour = now.getHours();
+            const currentMinutes = now.getMinutes();
+            
+            if (currentHour === 12 && currentMinutes === 0) {
+                if (Object.keys(state.bookings.departure).length > 0) {
+                    state.bookings.departure = {};
+                    saveState();
+                    console.log('✅ تم تصفية جدول الذهاب');
+                }
+            }
+            
+            if (currentHour === 18 && currentMinutes === 0) {
+                if (Object.keys(state.bookings.return).length > 0) {
+                    state.bookings.return = {};
+                    saveState();
+                    console.log('✅ تم تصفية جدول الإياب');
+                }
+            }
+        }
+
+        // ==================== دوال الأقسام الأساسية ====================
+        function showDashboard() {
+            if (state.isAdmin) {
+                showAdminDashboard();
+            } else {
+                showMyPage();
+            }
+        }
+
+        function showAdminDashboard() {
+            const totalStudents = state.students.length;
+            const totalPackages = state.packages.length;
+            const totalTrips = state.trips.length;
+            const activeBookings = Object.keys(state.bookings.departure).length + Object.keys(state.bookings.return).length;
+
+            $('#appContent').innerHTML = `
+                <div class="stats-grid">
+                    <div class="stat-card">
+                        <div class="stat-number">${totalStudents}</div>
+                        <div class="stat-label">إجمالي الطلاب</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-number">${totalPackages}</div>
+                        <div class="stat-label">الباقات</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-number">${totalTrips}</div>
+                        <div class="stat-label">الرحلات</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-number">${activeBookings}</div>
+                        <div class="stat-label">الحجوزات</div>
+                    </div>
+                </div>
+
+                <div class="card">
+                    <div class="card-title">حجز اليوم</div>
+                    <div id="todayBookings">
+                        ${renderTodayBookings()}
+                    </div>
+                </div>
+
+                <div class="card">
+                    <div class="card-title">آخر المنشورات</div>
+                    <div id="recentPosts">
+                        ${renderRecentPosts()}
+                    </div>
+                </div>
+
+                <div class="card">
+                    <div class="card-title">الملاحظات من الطلاب</div>
+                    <div id="studentMessages">
+                        ${renderStudentMessages()}
+                    </div>
+                </div>
+            `;
+        }
+
+        function showStudentsManagement() {
+            $('#appContent').innerHTML = `
+                <div class="card">
+                    <div class="card-title">إدارة الطلاب</div>
+                    <div style="display: flex; gap: 10px; flex-wrap: wrap;">
+                        <button class="btn btn-success" onclick="showAddStudentForm()">
+                            <i class="fas fa-user-plus"></i> إضافة طالب جديد
+                        </button>
+                        <button class="btn btn-primary" onclick="showQRScanner()">
+                            <i class="fas fa-qrcode"></i> ماسح QR
+                        </button>
+                        <button class="btn btn-secondary" onclick="showFilterByPackage()">
+                            <i class="fas fa-filter"></i> عرض حسب الباقة
+                        </button>
+                    </div>
+                </div>
+
+                <div class="card">
+                    <div class="card-title">قائمة الطلاب (${state.students.length})</div>
+                    <div class="table-container">
+                        <table class="table">
+                            <thead>
+                                <tr>
+                                    <th>المعرف</th>
+                                    <th>الاسم</th>
+                                    <th>الهاتف</th>
+                                    <th>الباقة</th>
+                                    <th>الرحلات</th>
+                                    <th>المسار</th>
+                                    <th>الإجراءات</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                ${state.students.map(student => {
+                                    const packageInfo = state.packages.find(p => p.id === student.packageId) || {};
+                                    return `
+                                        <tr>
+                                            <td>${student.id}</td>
+                                            <td>${escapeHtml(student.name)}</td>
+                                            <td>${student.phone}</td>
+                                            <td style="color: ${packageInfo.color || '#666'}">${packageInfo.name || 'غير محدد'}</td>
+                                            <td>${student.rides || 0}</td>
+                                            <td>${escapeHtml(student.route || 'غير محدد')}</td>
+                                            <td>
+                                                <button class="btn btn-primary btn-small" onclick="viewStudentCard('${student.id}')">
+                                                    <i class="fas fa-eye"></i> معاينة
+                                                </button>
+                                                <button class="btn btn-warning btn-small" onclick="addRidesToStudent('${student.id}')">
+                                                    <i class="fas fa-plus"></i> رحلات
+                                                </button>
+                                                <button class="btn btn-secondary btn-small" onclick="editStudent('${student.id}')">
+                                                    <i class="fas fa-edit"></i>
+                                                </button>
+                                                <button class="btn btn-danger btn-small" onclick="deleteStudent('${student.id}')">
+                                                    <i class="fas fa-trash"></i>
+                                                </button>
+                                            </td>
+                                        </tr>
+                                    `;
+                                }).join('')}
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            `;
+        }
+
+        function showPackagesManagement() {
+            $('#appContent').innerHTML = `
+                <div class="card">
+                    <div class="card-title">إدارة الباقات</div>
+                    <div style="display: flex; gap: 10px; flex-wrap: wrap;">
+                        <button class="btn btn-success" onclick="showAddPackageForm()">
+                            <i class="fas fa-plus"></i> إضافة باقة جديدة
+                        </button>
+                        <button class="btn btn-primary" onclick="showAssignPackageToGroup()">
+                            <i class="fas fa-users"></i> تعيين باقة لمجموعة
+                        </button>
+                    </div>
+                </div>
+
+                <div class="card">
+                    <div class="card-title">الباقات المتاحة (${state.packages.length})</div>
+                    <div class="stats-grid">
+                        ${state.packages.map(pkg => {
+                            const studentCount = state.students.filter(s => s.packageId === pkg.id).length;
+                            return `
+                                <div class="stat-card" style="border-left: 4px solid ${pkg.color}">
+                                    <div class="stat-number">${studentCount}</div>
+                                    <div class="stat-label">${pkg.name}</div>
+                                    <div style="font-size: 12px; color: #666;">${pkg.price} شيكل - ${pkg.rides} رحلة</div>
+                                    <div style="margin-top: 10px;">
+                                        <button class="btn btn-primary btn-small" onclick="editPackage('${pkg.id}')">
+                                            <i class="fas fa-edit"></i>
+                                        </button>
+                                        <button class="btn btn-danger btn-small" onclick="deletePackage('${pkg.id}')">
+                                            <i class="fas fa-trash"></i>
+                                        </button>
+                                    </div>
+                                </div>
+                            `;
+                        }).join('')}
+                    </div>
+                </div>
+            `;
+        }
+
+        function showTripsManagement() {
+            $('#appContent').innerHTML = `
+                <div class="card">
+                    <div class="card-title">إدارة الرحلات</div>
+                    <div style="display: flex; gap: 10px; flex-wrap: wrap;">
+                        <button class="btn btn-success" onclick="showManualTripForm()">
+                            <i class="fas fa-plus"></i> تسجيل رحلة يدوية
+                        </button>
+                        <button class="btn btn-warning" onclick="rolloverTrips()">
+                            <i class="fas fa-forward"></i> ترحيل الرحلات
+                        </button>
+                    </div>
+                </div>
+
+                <div class="card">
+                    <div class="card-title">سجل الرحلات (${state.trips.length})</div>
+                    <div class="table-container">
+                        <table class="table">
+                            <thead>
+                                <tr>
+                                    <th>الطالب</th>
+                                    <th>المعرف</th>
+                                    <th>التاريخ</th>
+                                    <th>الوقت</th>
+                                    <th>المسار</th>
+                                    <th>النوع</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                ${state.trips.map(trip => {
+                                    const student = state.students.find(s => s.id === trip.studentId) || {};
+                                    return `
+                                        <tr>
+                                            <td>${student.name || 'غير معروف'}</td>
+                                            <td>${trip.studentId}</td>
+                                            <td>${formatDate(trip.date)}</td>
+                                            <td>${formatTime(trip.date)}</td>
+                                            <td>${trip.route || student.route || 'غير محدد'}</td>
+                                            <td>${trip.type === 'manual' ? 'يدوية' : 'تلقائية'}</td>
+                                        </tr>
+                                    `;
+                                }).join('')}
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            `;
+        }
+
+        function showReports() {
+            $('#appContent').innerHTML = `
+                <div class="card">
+                    <div class="card-title">التقارير والإحصائيات</div>
+                    <div class="stats-grid">
+                        <div class="stat-card">
+                            <div class="stat-number">${state.students.length}</div>
+                            <div class="stat-label">إجمالي الطلاب</div>
+                        </div>
+                        <div class="stat-card">
+                            <div class="stat-number">${state.posts.length}</div>
+                            <div class="stat-label">المنشورات</div>
+                        </div>
+                        <div class="stat-card">
+                            <div class="stat-number">${state.trips.length}</div>
+                            <div class="stat-label">الرحلات</div>
+                        </div>
+                        <div class="stat-card">
+                            <div class="stat-number">${state.bookingLog.filter(log => log.action === 'Book').length}</div>
+                            <div class="stat-label">الحجوزات</div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="card">
+                    <div class="card-title">توزيع الطلاب حسب الباقات</div>
+                    <div class="chart-container">
+                        <canvas id="packagesChart"></canvas>
+                    </div>
+                </div>
+
+                <div class="card">
+                    <div class="card-title">تقرير الباقات</div>
+                    <div class="table-container">
+                        <table class="table">
+                            <thead>
+                                <tr>
+                                    <th>الباقة</th>
+                                    <th>عدد الطلاب</th>
+                                    <th>السعر</th>
+                                    <th>إجمالي الإيرادات</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                ${state.packages.map(pkg => {
+                                    const studentCount = state.students.filter(s => s.packageId === pkg.id).length;
+                                    const totalRevenue = studentCount * pkg.price;
+                                    return `
+                                        <tr>
+                                            <td>${pkg.name}</td>
+                                            <td>${studentCount}</td>
+                                            <td>${pkg.price} شيكل</td>
+                                            <td>${totalRevenue} شيكل</td>
+                                        </tr>
+                                    `;
+                                }).join('')}
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+
+                <div class="card">
+                    <div class="card-title">حجز اليوم</div>
+                    <div class="table-container">
+                        <table class="table">
+                            <thead>
+                                <tr>
+                                    <th>الطالب</th>
+                                    <th>النوع</th>
+                                    <th>الوقت</th>
+                                    <th>الصف</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                ${renderTodayDetailedBookings()}
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            `;
+
+            setTimeout(() => {
+                renderPackagesChart();
+            }, 100);
+        }
+
+        // ==================== نظام المنشورات المحسن ====================
+        function togglePostPin(postId) {
+            if (!state.isAdmin) return;
+            
+            const post = state.posts.find(p => p.id === postId);
+            if (post) {
+                post.pinned = !post.pinned;
+                post.pinDate = post.pinned ? new Date().toISOString() : null;
+                saveState();
+                showCommunity();
+                alert(post.pinned ? 'تم تثبيت المنشور' : 'تم إلغاء تثبيت المنشور');
+            }
+        }
+
+        function showCommunity() {
+            $('#appContent').innerHTML = `
+                <div class="card">
+                    <div class="card-title">المجتمع</div>
+                    <button class="btn btn-success btn-block" onclick="showAddPostForm()">
+                        <i class="fas fa-plus"></i> نشر منشور جديد
+                    </button>
+                </div>
+
+                <div class="card">
+                    <div class="card-title">آخر المنشورات</div>
+                    <div id="communityPosts">
+                        ${renderCommunityPosts()}
+                    </div>
+                </div>
+            `;
+        }
+
+        function renderCommunityPosts() {
+            const oneDayAgo = new Date();
+            oneDayAgo.setDate(oneDayAgo.getDate() - 1);
+            
+            // الحصول على المنشورات المثبتة أولاً
+            const pinnedPosts = state.posts
+                .filter(post => post.pinned && post.visible !== false)
+                .sort((a, b) => new Date(b.pinDate) - new Date(a.pinDate));
+            
+            // ثم المنشورات العادية من آخر 24 ساعة
+            const recentPosts = state.posts
+                .filter(post => !post.pinned && post.visible !== false && new Date(post.date) > oneDayAgo)
+                .sort((a, b) => new Date(b.date) - new Date(a.date));
+            
+            const allPosts = [...pinnedPosts, ...recentPosts].slice(0, 15);
+
+            if (allPosts.length === 0) {
+                return '<p style="text-align: center; padding: 30px; color: #666;">لا توجد منشورات بعد</p>';
+            }
+
+            return allPosts.map(post => {
+                const author = post.studentId === 'admin' ? 
+                    { name: state.settings.adminName, profilePhoto: state.adminProfile.profilePhoto } : 
+                    state.students.find(s => s.id === post.studentId) || { name: 'طالب', profilePhoto: null };
+                
+                return `
+                    <div class="post-card ${post.pinned ? 'pinned-post' : ''}">
+                        <div class="post-header">
+                            <div class="post-avatar">
+                                <img src="${author.profilePhoto || 'https://via.placeholder.com/40x52/3498db/FFFFFF?text=ص'}" alt="${author.name}">
+                            </div>
+                            <div style="flex: 1;">
+                                <strong>${author.name}</strong>
+                                ${post.pinned ? '<span class="pin-badge">مثبت</span>' : ''}
+                                <div style="font-size: 12px; color: #666;">${formatDate(post.date)} ${formatTime(post.date)}</div>
+                            </div>
+                            ${state.isAdmin ? `
+                                <div class="dropdown">
+                                    <button class="btn btn-small btn-secondary">
+                                        <i class="fas fa-ellipsis-v"></i>
+                                    </button>
+                                    <div class="dropdown-content">
+                                        <button class="dropdown-item" onclick="togglePostPin('${post.id}')">
+                                            <i class="fas fa-thumbtack"></i> ${post.pinned ? 'إلغاء التثبيت' : 'تثبيت'}
+                                        </button>
+                                    </div>
+                                </div>
+                            ` : ''}
+                        </div>
+                        <p>${escapeHtml(post.content)}</p>
+                        ${post.images && post.images.length > 0 ? `
+                            <div style="margin-top: 10px;">
+                                ${post.images.map(img => `
+                                    <img src="${img}" style="max-width: 100%; border-radius: 8px; margin-bottom: 5px;" alt="صورة المنشور">
+                                `).join('')}
+                            </div>
+                        ` : ''}
+                        <div class="post-actions">
+                            <div class="post-action ${post.likes && post.likes.includes(state.currentUser?.id) ? 'active' : ''}" onclick="toggleLike('${post.id}')">
+                                <i class="fas fa-heart"></i> ${post.likes ? post.likes.length : 0}
+                            </div>
+                            <div class="post-action" onclick="showComments('${post.id}')">
+                                <i class="fas fa-comment"></i> ${post.comments ? post.comments.length : 0}
+                            </div>
+                        </div>
+                    </div>
+                `;
+            }).join('');
+        }
+
+        function showMyPage() {
+            if (!state.currentUser) return;
+
+            $('#appContent').innerHTML = `
+                <div class="card">
+                    <div class="card-title">لوحتي</div>
+                    <div class="stats-grid">
+                        <div class="stat-card">
+                            <div class="stat-number">${state.currentUser.rides || 0}</div>
+                            <div class="stat-label">الرحلات المتبقية</div>
+                        </div>
+                        <div class="stat-card">
+                            <div class="stat-number">
+                                ${state.packages.find(p => p.id === state.currentUser.packageId)?.name || 'غير محدد'}
+                            </div>
+                            <div class="stat-label">الباقة</div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="card">
+                    <div class="card-title">منشوراتي</div>
+                    <div id="myPosts">
+                        ${renderMyPosts()}
+                    </div>
+                </div>
+            `;
+        }
+
+        function renderMyPosts() {
+            const myPosts = state.posts
+                .filter(post => post.studentId === state.currentUser.id)
+                .sort((a, b) => new Date(b.date) - new Date(a.date))
+                .slice(0, 10);
+
+            if (myPosts.length === 0) {
+                return '<p style="text-align: center; padding: 30px; color: #666;">لا توجد منشورات بعد</p>';
+            }
+
+            return myPosts.map(post => `
+                <div class="post-card">
+                    <div class="post-header">
+                        <div style="font-size: 12px; color: #666;">${formatDate(post.date)} ${formatTime(post.date)}</div>
+                    </div>
+                    <p>${escapeHtml(post.content)}</p>
+                    ${post.images && post.images.length > 0 ? `
+                        <div style="margin-top: 10px;">
+                            ${post.images.map(img => `
+                                <img src="${img}" style="max-width: 100%; border-radius: 8px; margin-bottom: 5px;" alt="صورة المنشور">
+                            `).join('')}
+                        </div>
+                    ` : ''}
+                    <div class="post-actions">
+                        <div class="post-action ${post.likes && post.likes.includes(state.currentUser.id) ? 'active' : ''}">
+                            <i class="fas fa-heart"></i> ${post.likes ? post.likes.length : 0}
+                        </div>
+                        <div class="post-action">
+                            <i class="fas fa-comment"></i> ${post.comments ? post.comments.length : 0}
+                        </div>
+                        ${!post.visible ? '<span style="color: #666; font-size: 12px;">(خاص)</span>' : ''}
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        function showNotes() {
+            $('#appContent').innerHTML = `
+                <div class="card">
+                    <div class="card-title">المذكرات</div>
+                    <button class="btn btn-success btn-block" onclick="showAddNoteForm()">
+                        <i class="fas fa-plus"></i> إضافة مذكرة جديدة
+                    </button>
+                </div>
+
+                <div class="card">
+                    <div class="card-title">مذكراتي</div>
+                    <div id="notesList">
+                        ${renderNotesList()}
+                    </div>
+                </div>
+            `;
+        }
+
+        function renderNotesList() {
+            const userNotes = state.notes.filter(note => 
+                note.studentId === (state.isAdmin ? 'admin' : state.currentUser.id)
+            ).sort((a, b) => new Date(b.date) - new Date(a.date));
+
+            if (userNotes.length === 0) {
+                return '<p style="text-align: center; padding: 30px; color: #666;">لا توجد مذكرات بعد</p>';
+            }
+
+            return userNotes.map(note => `
+                <div class="post-card" onclick="viewNote('${note.id}')" style="cursor: pointer;">
+                    <h4>${escapeHtml(note.title)}</h4>
+                    <p>${escapeHtml(note.content.length > 100 ? note.content.substring(0, 100) + '...' : note.content)}</p>
+                    <small style="color: #666;">${formatDate(note.date)}</small>
+                </div>
+            `).join('');
+        }
+
+        // ==================== نظام الردود على الملاحظات ====================
+        function showMessageReplies(messageId) {
+            const message = state.messages.find(m => m.id === messageId);
+            if (!message) return;
+
+            if (!message.replies) message.replies = [];
+
+            showModal(`
+                <div class="card-title">الملاحظة والردود</div>
+                <div class="post-card">
+                    <div class="post-header">
+                        <strong>${state.students.find(s => s.id === message.studentId)?.name || 'طالب'}</strong>
+                        <small style="color: #666;">${formatDate(message.date)}</small>
+                    </div>
+                    <p>${escapeHtml(message.content)}</p>
+                </div>
+                
+                <div class="reply-section">
+                    <h4>الردود (${message.replies.length})</h4>
+                    ${message.replies.length > 0 ? message.replies.map(reply => `
+                        <div class="reply-item">
+                            <div class="reply-header">
+                                <span>${reply.isAdmin ? state.settings.adminName : 'طالب'}</span>
+                                <small>${formatDate(reply.date)}</small>
+                            </div>
+                            <p>${escapeHtml(reply.content)}</p>
+                        </div>
+                    `).join('') : '<p style="text-align: center; color: #666;">لا توجد ردود بعد</p>'}
+                </div>
+
+                ${state.isAdmin ? `
+                    <div class="form-group" style="margin-top: 15px;">
+                        <textarea class="form-control" id="replyContent" rows="3" placeholder="اكتب ردك هنا..."></textarea>
+                    </div>
+                    <div style="display: flex; gap: 10px; margin-top: 15px;">
+                        <button class="btn btn-secondary" onclick="hideModal()">إغلاق</button>
+                        <button class="btn btn-primary" onclick="addReplyToMessage('${messageId}')">إضافة رد</button>
+                    </div>
+                ` : `
+                    <div style="display: flex; gap: 10px; margin-top: 15px;">
+                        <button class="btn btn-secondary" onclick="hideModal()">إغلاق</button>
+                    </div>
+                `}
+            `);
+        }
+
+        function addReplyToMessage(messageId) {
+            const message = state.messages.find(m => m.id === messageId);
+            if (!message) return;
+
+            const replyContent = $('#replyContent').value;
+            if (!replyContent.trim()) {
+                alert('يرجى كتابة الرد');
+                return;
+            }
+
+            if (!message.replies) message.replies = [];
+
+            const newReply = {
+                id: generateId('REPLY'),
+                content: replyContent.trim(),
+                date: new Date().toISOString(),
+                isAdmin: true
+            };
+
+            message.replies.push(newReply);
+            message.read = true;
+
+            addNotification('message', `رد المشرف على ملاحظتك`, messageId);
+
+            saveState();
+            showMessageReplies(messageId);
+            alert('تم إرسال الرد بنجاح');
+        }
+
+        // ==================== دوال مساعدة إضافية ====================
+        function renderTodayBookings() {
+            const today = new Date().toLocaleDateString('en-US');
+            const todayBookings = state.bookingLog.filter(log => 
+                new Date(log.date).toLocaleDateString('en-US') === today
+            ).slice(0, 5);
+
+            if (todayBookings.length === 0) {
+                return '<p style="text-align: center; padding: 20px; color: #666;">لا توجد حجوزات اليوم</p>';
+            }
+
+            return `
+                <div class="table-container">
+                    <table class="table">
+                        <thead>
+                            <tr>
+                                <th>الطالب</th>
+                                <th>النوع</th>
+                                <th>الوقت</th>
+                                <th>الحالة</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            ${todayBookings.map(booking => `
+                                <tr>
+                                    <td>${booking.studentName}</td>
+                                    <td>${booking.type === 'departure' ? 'ذهاب' : 'إياب'}</td>
+                                    <td>${booking.timeSlot}</td>
+                                    <td>${booking.action === 'Book' ? 'حجز' : 'إلغاء'}</td>
+                                </tr>
+                            `).join('')}
+                        </tbody>
+                    </table>
+                </div>
+            `;
+        }
+
+        function renderRecentPosts() {
+            const recentPosts = state.posts
+                .filter(post => post.visible !== false)
+                .sort((a, b) => new Date(b.date) - new Date(a.date))
+                .slice(0, 3);
+
+            if (recentPosts.length === 0) {
+                return '<p style="text-align: center; padding: 20px; color: #666;">لا توجد منشورات حديثة</p>';
+            }
+
+            return recentPosts.map(post => {
+                const student = state.students.find(s => s.id === post.studentId) || { name: state.settings.adminName };
+                return `
+                    <div class="post-card">
+                        <div class="post-header">
+                            <div class="post-avatar">
+                                <img src="${student.profilePhoto || 'https://via.placeholder.com/40x52/3498db/FFFFFF?text=ص'}" alt="${student.name}">
+                            </div>
+                            <div>
+                                <strong>${student.name}</strong>
+                                <div style="font-size: 12px; color: #666;">${formatDate(post.date)}</div>
+                            </div>
+                        </div>
+                        <p>${escapeHtml(post.content)}</p>
+                        ${post.images && post.images.length > 0 ? `
+                            <div style="margin-top: 10px;">
+                                <img src="${post.images[0]}" style="max-width: 100%; border-radius: 8px;" alt="صورة المنشور">
+                            </div>
+                        ` : ''}
+                        <div class="post-actions">
+                            <div class="post-action">
+                                <i class="fas fa-heart"></i> ${post.likes ? post.likes.length : 0}
+                            </div>
+                            <div class="post-action">
+                                <i class="fas fa-comment"></i> ${post.comments ? post.comments.length : 0}
+                            </div>
+                        </div>
+                    </div>
+                `;
+            }).join('');
+        }
+
+        function renderStudentMessages() {
+            const recentMessages = state.messages
+                .sort((a, b) => new Date(b.date) - new Date(a.date))
+                .slice(0, 5);
+
+            if (recentMessages.length === 0) {
+                return '<p style="text-align: center; padding: 20px; color: #666;">لا توجد ملاحظات من الطلاب</p>';
+            }
+
+            return recentMessages.map(message => {
+                const student = state.students.find(s => s.id === message.studentId) || { name: 'طالب' };
+                return `
+                    <div class="post-card" onclick="showMessageReplies('${message.id}')" style="cursor: pointer;">
+                        <div class="post-header">
+                            <div class="post-avatar">
+                                <img src="${student.profilePhoto || 'https://via.placeholder.com/40x52/3498db/FFFFFF?text=ص'}" alt="${student.name}">
+                            </div>
+                            <div>
+                                <strong>${student.name}</strong>
+                                <div style="font-size: 12px; color: #666;">${formatDate(message.date)}</div>
+                            </div>
+                        </div>
+                        <p>${escapeHtml(message.content)}</p>
+                        ${message.replies && message.replies.length > 0 ? 
+                            `<small style="color: var(--success);"><i class="fas fa-reply"></i> ${message.replies.length} رد</small>` : 
+                            '<small style="color: #666;">بانتظار الرد</small>'
+                        }
+                    </div>
+                `;
+            }).join('');
+        }
+
+        function renderTodayDetailedBookings() {
+            const today = new Date().toLocaleDateString('en-US');
+            const todayBookings = state.bookingLog.filter(log => 
+                new Date(log.date).toLocaleDateString('en-US') === today && log.action === 'Book'
+            );
+
+            if (todayBookings.length === 0) {
+                return '<tr><td colspan="4" style="text-align: center; padding: 20px; color: #666;">لا توجد حجوزات اليوم</td></tr>';
+            }
+
+            todayBookings.sort((a, b) => {
+                const timeA = parseInt(a.timeSlot);
+                const timeB = parseInt(b.timeSlot);
+                return timeA - timeB;
+            });
+
+            return todayBookings.map(booking => `
+                <tr>
+                    <td>${booking.studentName}</td>
+                    <td>${booking.type === 'departure' ? 'ذهاب' : 'إياب'}</td>
+                    <td>${booking.timeSlot}</td>
+                    <td>${booking.row}</td>
+                </tr>
+            `).join('');
+        }
+
+        function renderPackagesChart() {
+            const ctx = document.getElementById('packagesChart').getContext('2d');
+            const packageData = state.packages.map(pkg => {
+                const studentCount = state.students.filter(s => s.packageId === pkg.id).length;
+                return {
+                    label: pkg.name,
+                    data: [studentCount],
+                    backgroundColor: pkg.color,
+                    borderColor: pkg.color,
+                    borderWidth: 1
+                };
+            });
+
+            new Chart(ctx, {
+                type: 'bar',
+                data: {
+                    labels: ['عدد الطلاب'],
+                    datasets: packageData
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    scales: {
+                        y: {
+                            beginAtZero: true,
+                            ticks: {
+                                stepSize: 1
+                            }
+                        }
+                    }
+                }
+            });
+        }
+
+        // ==================== دوال تفعيل الأزرار ====================
+        function showAddStudentForm() {
+            showModal(`
+                <div class="card-title">إضافة طالب جديد</div>
+                <div class="form-group">
+                    <label class="form-label">اسم الطالب</label>
+                    <input type="text" class="form-control" id="newStudentName" placeholder="أدخل اسم الطالب">
+                </div>
+                <div class="form-group">
+                    <label class="form-label">رقم الهاتف</label>
+                    <input type="tel" class="form-control" id="newStudentPhone" placeholder="أدخل رقم الهاتف">
+                </div>
+                <div class="form-group">
+                    <label class="form-label">الباقة</label>
+                    <select class="form-control" id="newStudentPackage">
+                        <option value="">اختر الباقة</option>
+                        ${state.packages.map(pkg => `<option value="${pkg.id}">${pkg.name}</option>`).join('')}
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label class="form-label">المسار</label>
+                    <input type="text" class="form-control" id="newStudentRoute" placeholder="أدخل المسار">
+                </div>
+                <div style="display: flex; gap: 10px; margin-top: 20px;">
+                    <button class="btn btn-secondary" onclick="hideModal()">إلغاء</button>
+                    <button class="btn btn-success" onclick="addNewStudent()">إضافة الطالب</button>
+                </div>
+            `);
+        }
+
+        function addNewStudent() {
+            const name = $('#newStudentName').value;
+            const phone = $('#newStudentPhone').value;
+            const packageId = $('#newStudentPackage').value;
+            const route = $('#newStudentRoute').value;
+
+            if (!name || !phone || !packageId) {
+                alert('يرجى ملء جميع الحقول المطلوبة');
+                return;
+            }
+
+            const newStudent = {
+                id: generateId('S'),
+                name: name,
+                phone: phone,
+                packageId: packageId,
+                rides: state.packages.find(p => p.id === packageId)?.rides || 0,
+                route: route,
+                profilePhoto: null,
+                coverPhoto: null,
+                profilePublic: true,
+                password: null,
+                academicYear: '2023/2024'
+            };
+
+            state.students.push(newStudent);
+            saveState();
+            hideModal();
+            showStudentsManagement();
+            alert('تم إضافة الطالب بنجاح');
+        }
+
+        function editStudent(studentId) {
+            const student = state.students.find(s => s.id === studentId);
+            if (!student) return;
+
+            showModal(`
+                <div class="card-title">تعديل بيانات الطالب</div>
+                <div class="form-group">
+                    <label class="form-label">اسم الطالب</label>
+                    <input type="text" class="form-control" id="editStudentName" value="${escapeHtml(student.name)}">
+                </div>
+                <div class="form-group">
+                    <label class="form-label">رقم الهاتف</label>
+                    <input type="tel" class="form-control" id="editStudentPhone" value="${student.phone}">
+                </div>
+                <div class="form-group">
+                    <label class="form-label">الباقة</label>
+                    <select class="form-control" id="editStudentPackage">
+                        ${state.packages.map(pkg => `
+                            <option value="${pkg.id}" ${pkg.id === student.packageId ? 'selected' : ''}>${pkg.name}</option>
+                        `).join('')}
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label class="form-label">المسار</label>
+                    <input type="text" class="form-control" id="editStudentRoute" value="${escapeHtml(student.route || '')}">
+                </div>
+                <div class="form-group">
+                    <label class="form-label">عدد الرحلات المتبقية</label>
+                    <input type="number" class="form-control" id="editStudentRides" value="${student.rides || 0}">
+                </div>
+                <div style="display: flex; gap: 10px; margin-top: 20px;">
+                    <button class="btn btn-secondary" onclick="hideModal()">إلغاء</button>
+                    <button class="btn btn-success" onclick="saveStudentEdit('${studentId}')">حفظ التعديلات</button>
+                </div>
+            `);
+        }
+
+        function saveStudentEdit(studentId) {
+            const student = state.students.find(s => s.id === studentId);
+            if (!student) return;
+
+            student.name = $('#editStudentName').value;
+            student.phone = $('#editStudentPhone').value;
+            student.packageId = $('#editStudentPackage').value;
+            student.route = $('#editStudentRoute').value;
+            student.rides = parseInt($('#editStudentRides').value) || 0;
+
+            saveState();
+            hideModal();
+            showStudentsManagement();
+            alert('تم حفظ التعديلات بنجاح');
+        }
+
+        function deleteStudent(studentId) {
+            if (!confirm('هل أنت متأكد من حذف هذا الطالب؟ سيتم حذف جميع بياناته.')) {
+                return;
+            }
+
+            state.students = state.students.filter(s => s.id !== studentId);
+            saveState();
+            showStudentsManagement();
+            alert('تم حذف الطالب بنجاح');
+        }
+
+        function viewStudentCard(studentId) {
+            const student = state.students.find(s => s.id === studentId);
+            if (!student) return;
+
+            const packageInfo = state.packages.find(p => p.id === student.packageId) || {};
+            
+            showModal(`
+                <div class="student-card">
+                    <div class="student-card-header">
+                        <div class="student-avatar">
+                            <img src="${student.profilePhoto || 'https://via.placeholder.com/100x130/3498db/FFFFFF?text=ص'}" alt="صورة الطالب">
+                        </div>
+                        <h3>${student.name}</h3>
+                        <p>${student.id}</p>
+                    </div>
+                    <div class="student-info">
+                        <div class="student-info-item">
+                            <span>الهاتف:</span>
+                            <span>${student.phone}</span>
+                        </div>
+                        <div class="student-info-item">
+                            <span>الباقة:</span>
+                            <span style="color: ${packageInfo.color || '#666'}">${packageInfo.name || 'غير محدد'}</span>
+                        </div>
+                        <div class="student-info-item">
+                            <span>الرحلات المتبقية:</span>
+                            <span>${student.rides || 0}</span>
+                        </div>
+                        <div class="student-info-item">
+                            <span>المسار:</span>
+                            <span>${escapeHtml(student.route || 'غير محدد')}</span>
+                        </div>
+                        <div class="student-info-item">
+                            <span>السنة الدراسية:</span>
+                            <span>${student.academicYear || '2023/2024'}</span>
+                        </div>
+                    </div>
+                    
+                    <!-- إضافة الباركود -->
+                    <div class="qrcode-container">
+                        <h4>باركود الطالب</h4>
+                        <div id="studentQRCode"></div>
+                        <button class="btn btn-primary print-btn" onclick="printStudentCard('${studentId}')">
+                            <i class="fas fa-print"></i> طباعة البطاقة
+                        </button>
+                    </div>
+                    
+                    <div style="margin-top: 20px;">
+                        <button class="btn btn-primary" onclick="hideModal(); editStudent('${studentId}')">
+                            <i class="fas fa-edit"></i> تعديل البيانات
+                        </button>
+                        <button class="btn btn-secondary" onclick="hideModal()">
+                            <i class="fas fa-times"></i> إغلاق
+                        </button>
+                    </div>
+                </div>
+            `);
+            
+            setTimeout(() => {
+                generateQRCode(studentId, 'studentQRCode');
+            }, 100);
+        }
+
+        function addRidesToStudent(studentId) {
+            const student = state.students.find(s => s.id === studentId);
+            if (!student) return;
+
+            showModal(`
+                <div class="card-title">إضافة رحلات للطالب</div>
+                <div class="form-group">
+                    <label class="form-label">الرحلات الحالية: ${student.rides || 0}</label>
+                    <input type="number" class="form-control" id="additionalRides" placeholder="عدد الرحلات المضافة" min="1">
+                </div>
+                <div style="display: flex; gap: 10px; margin-top: 20px;">
+                    <button class="btn btn-secondary" onclick="hideModal()">إلغاء</button>
+                    <button class="btn btn-success" onclick="saveAdditionalRides('${studentId}')">إضافة الرحلات</button>
+                </div>
+            `);
+        }
+
+        function saveAdditionalRides(studentId) {
+            const student = state.students.find(s => s.id === studentId);
+            if (!student) return;
+
+            const additionalRides = parseInt($('#additionalRides').value) || 0;
+            if (additionalRides <= 0) {
+                alert('يرجى إدخال عدد صحيح موجب');
+                return;
+            }
+
+            student.rides = (student.rides || 0) + additionalRides;
+            saveState();
+            hideModal();
+            showStudentsManagement();
+            alert(`تم إضافة ${additionalRides} رحلة للطالب بنجاح`);
+        }
+
+        function showAddPackageForm() {
+            showModal(`
+                <div class="card-title">إضافة باقة جديدة</div>
+                <div class="form-group">
+                    <label class="form-label">اسم الباقة</label>
+                    <input type="text" class="form-control" id="newPackageName" placeholder="أدخل اسم الباقة">
+                </div>
+                <div class="form-group">
+                    <label class="form-label">السعر (شيكل)</label>
+                    <input type="number" class="form-control" id="newPackagePrice" placeholder="أدخل السعر">
+                </div>
+                <div class="form-group">
+                    <label class="form-label">عدد الرحلات</label>
+                    <input type="number" class="form-control" id="newPackageRides" placeholder="أدخل عدد الرحلات">
+                </div>
+                <div class="form-group">
+                    <label class="form-label">لون الباقة</label>
+                    <input type="color" class="form-control" id="newPackageColor" value="#3498db">
+                </div>
+                <div style="display: flex; gap: 10px; margin-top: 20px;">
+                    <button class="btn btn-secondary" onclick="hideModal()">إلغاء</button>
+                    <button class="btn btn-success" onclick="addNewPackage()">إضافة الباقة</button>
+                </div>
+            `);
+        }
+
+        function addNewPackage() {
+            const name = $('#newPackageName').value;
+            const price = parseInt($('#newPackagePrice').value);
+            const rides = parseInt($('#newPackageRides').value);
+            const color = $('#newPackageColor').value;
+
+            if (!name || !price || !rides) {
+                alert('يرجى ملء جميع الحقول المطلوبة');
+                return;
+            }
+
+            const newPackage = {
+                id: generateId('P'),
+                name: name,
+                price: price,
+                rides: rides,
+                color: color
+            };
+
+            state.packages.push(newPackage);
+            saveState();
+            hideModal();
+            showPackagesManagement();
+            alert('تم إضافة الباقة بنجاح');
+        }
+
+        function editPackage(packageId) {
+            const pkg = state.packages.find(p => p.id === packageId);
+            if (!pkg) return;
+
+            showModal(`
+                <div class="card-title">تعديل الباقة</div>
+                <div class="form-group">
+                    <label class="form-label">اسم الباقة</label>
+                    <input type="text" class="form-control" id="editPackageName" value="${escapeHtml(pkg.name)}">
+                </div>
+                <div class="form-group">
+                    <label class="form-label">السعر (شيكل)</label>
+                    <input type="number" class="form-control" id="editPackagePrice" value="${pkg.price}">
+                </div>
+                <div class="form-group">
+                    <label class="form-label">عدد الرحلات</label>
+                    <input type="number" class="form-control" id="editPackageRides" value="${pkg.rides}">
+                </div>
+                <div class="form-group">
+                    <label class="form-label">لون الباقة</label>
+                    <input type="color" class="form-control" id="editPackageColor" value="${pkg.color}">
+                </div>
+                <div style="display: flex; gap: 10px; margin-top: 20px;">
+                    <button class="btn btn-secondary" onclick="hideModal()">إلغاء</button>
+                    <button class="btn btn-success" onclick="savePackageEdit('${packageId}')">حفظ التعديلات</button>
+                </div>
+            `);
+        }
+
+        function savePackageEdit(packageId) {
+            const pkg = state.packages.find(p => p.id === packageId);
+            if (!pkg) return;
+
+            pkg.name = $('#editPackageName').value;
+            pkg.price = parseInt($('#editPackagePrice').value);
+            pkg.rides = parseInt($('#editPackageRides').value);
+            pkg.color = $('#editPackageColor').value;
+
+            saveState();
+            hideModal();
+            showPackagesManagement();
+            alert('تم حفظ التعديلات بنجاح');
+        }
+
+        function deletePackage(packageId) {
+            const studentsWithPackage = state.students.filter(s => s.packageId === packageId);
+            if (studentsWithPackage.length > 0) {
+                alert(`لا يمكن حذف الباقة لأنها مرتبطة بـ ${studentsWithPackage.length} طالب. يرجى تغيير باقات هؤلاء الطلاب أولاً.`);
+                return;
+            }
+
+            if (!confirm('هل أنت متأكد من حذف هذه الباقة؟')) {
+                return;
+            }
+
+            state.packages = state.packages.filter(p => p.id !== packageId);
+            saveState();
+            showPackagesManagement();
+            alert('تم حذف الباقة بنجاح');
+        }
+
+        function showManualTripForm() {
+            showModal(`
+                <div class="card-title">تسجيل رحلة يدوية</div>
+                <div class="form-group">
+                    <label class="form-label">الطالب</label>
+                    <select class="form-control" id="tripStudent">
+                        <option value="">اختر الطالب</option>
+                        ${state.students.map(student => `
+                            <option value="${student.id}">${student.name} (${student.id})</option>
+                        `).join('')}
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label class="form-label">نوع الرحلة</label>
+                    <select class="form-control" id="tripType">
+                        <option value="departure">ذهاب</option>
+                        <option value="return">إياب</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label class="form-label">التاريخ والوقت</label>
+                    <input type="datetime-local" class="form-control" id="tripDateTime" value="${new Date().toISOString().slice(0, 16)}">
+                </div>
+                <div style="display: flex; gap: 10px; margin-top: 20px;">
+                    <button class="btn btn-secondary" onclick="hideModal()">إلغاء</button>
+                    <button class="btn btn-success" onclick="saveManualTrip()">تسجيل الرحلة</button>
+                </div>
+            `);
+        }
+
+        function saveManualTrip() {
+            const studentId = $('#tripStudent').value;
+            const tripType = $('#tripType').value;
+            const dateTime = $('#tripDateTime').value;
+
+            if (!studentId) {
+                alert('يرجى اختيار الطالب');
+                return;
+            }
+
+            const student = state.students.find(s => s.id === studentId);
+            if (!student) {
+                alert('الطالب غير موجود');
+                return;
+            }
+
+            if (student.rides > 0) {
+                student.rides--;
+            }
+
+            const newTrip = {
+                id: generateId('T'),
+                studentId: studentId,
+                type: tripType,
+                date: new Date(dateTime).toISOString(),
+                route: student.route,
+                status: 'completed',
+                method: 'manual'
+            };
+
+            state.trips.push(newTrip);
+            saveState();
+            hideModal();
+            showTripsManagement();
+            alert('تم تسجيل الرحلة بنجاح');
+        }
+
+        function rolloverTrips() {
+            if (!confirm('هل تريد ترحيل الرحلات للشهر الجديد؟ سيتم إعادة تعيين عدد الرحلات للطلاب حسب باقاتهم.')) {
+                return;
+            }
+
+            state.students.forEach(student => {
+                const packageInfo = state.packages.find(p => p.id === student.packageId);
+                if (packageInfo) {
+                    student.rides = packageInfo.rides;
+                }
+            });
+
+            saveState();
+            showTripsManagement();
+            alert('تم ترحيل الرحلات بنجاح');
+        }
+
+        function showAddPostForm() {
+            showModal(`
+                <div class="card-title">نشر منشور جديد</div>
+                <div class="form-group">
+                    <label class="form-label">المحتوى</label>
+                    <textarea class="form-control" id="newPostContent" rows="4" placeholder="اكتب منشورك هنا..."></textarea>
+                </div>
+                <div class="form-group">
+                    <label class="form-label">إضافة صورة (اختياري)</label>
+                    <input type="file" class="form-control" id="newPostImage" accept="image/*">
+                </div>
+                ${state.isAdmin ? `
+                    <div class="form-group">
+                        <label class="form-label">
+                            <input type="checkbox" id="postVisible" checked> مرئي للجميع
+                        </label>
+                    </div>
+                ` : ''}
+                <div style="display: flex; gap: 10px; margin-top: 20px;">
+                    <button class="btn btn-secondary" onclick="hideModal()">إلغاء</button>
+                    <button class="btn btn-success" onclick="publishNewPost()">نشر</button>
+                </div>
+            `);
+        }
+
+        function publishNewPost() {
+            const content = $('#newPostContent').value;
+            if (!content.trim()) {
+                alert('يرجى كتابة محتوى للمنشور');
+                return;
+            }
+
+            const newPost = {
+                id: generateId('POST'),
+                studentId: state.isAdmin ? 'admin' : state.currentUser.id,
+                content: content.trim(),
+                date: new Date().toISOString(),
+                likes: [],
+                comments: [],
+                images: [],
+                visible: state.isAdmin ? $('#postVisible')?.checked !== false : true
+            };
+
+            const imageInput = $('#newPostImage');
+            if (imageInput.files.length > 0) {
+                const file = imageInput.files[0];
+                const reader = new FileReader();
+                reader.onload = function(e) {
+                    newPost.images = [e.target.result];
+                    state.posts.unshift(newPost);
+                    saveState();
+                    hideModal();
+                    showCommunity();
+                    alert('تم نشر المنشور بنجاح');
+                };
+                reader.readAsDataURL(file);
+            } else {
+                state.posts.unshift(newPost);
+                saveState();
+                hideModal();
+                showCommunity();
+                alert('تم نشر المنشور بنجاح');
+            }
+        }
+
+        function toggleLike(postId) {
+            if (!state.currentUser && !state.isAdmin) {
+                alert('يجب تسجيل الدخول لإبداء الإعجاب');
+                return;
+            }
+
+            const post = state.posts.find(p => p.id === postId);
+            if (!post) return;
+
+            if (!post.likes) post.likes = [];
+            
+            const userId = state.isAdmin ? 'admin' : state.currentUser.id;
+            const likeIndex = post.likes.indexOf(userId);
+
+            if (likeIndex > -1) {
+                post.likes.splice(likeIndex, 1);
+            } else {
+                post.likes.push(userId);
+                
+                if (post.studentId !== userId) {
+                    const likerName = state.isAdmin ? state.settings.adminName : state.currentUser.name;
+                    const postOwner = state.students.find(s => s.id === post.studentId) || { name: state.settings.adminName };
+                    addNotification('like', `${likerName} أعجب بمنشورك`, postId);
+                }
+            }
+
+            saveState();
+            showCommunity();
+        }
+
+        function showComments(postId) {
+            const post = state.posts.find(p => p.id === postId);
+            if (!post) return;
+
+            if (!post.comments) post.comments = [];
+
+            showModal(`
+                <div class="card-title">التعليقات على المنشور</div>
+                <div style="max-height: 300px; overflow-y: auto; margin-bottom: 15px;">
+                    ${post.comments.length > 0 ? post.comments.map(comment => {
+                        const commenter = comment.studentId === 'admin' ? 
+                            { name: state.settings.adminName } : 
+                            state.students.find(s => s.id === comment.studentId) || { name: 'طالب' };
+                        
+                        return `
+                            <div class="post-card" style="margin-bottom: 10px;">
+                                <div class="post-header">
+                                    <strong>${commenter.name}</strong>
+                                    <small style="color: #666;">${formatDate(comment.date)}</small>
+                                </div>
+                                <p>${escapeHtml(comment.content)}</p>
+                            </div>
+                        `;
+                    }).join('') : '<p style="text-align: center; color: #666;">لا توجد تعليقات بعد</p>'}
+                </div>
+                <div class="form-group">
+                    <textarea class="form-control" id="newComment" rows="2" placeholder="اكتب تعليقك..."></textarea>
+                </div>
+                <div style="display: flex; gap: 10px; margin-top: 15px;">
+                    <button class="btn btn-secondary" onclick="hideModal()">إغلاق</button>
+                    <button class="btn btn-primary" onclick="addComment('${postId}')">إضافة تعليق</button>
+                </div>
+            `);
+        }
+
+        function addComment(postId) {
+            const commentContent = $('#newComment').value;
+            if (!commentContent.trim()) {
+                alert('يرجى كتابة تعليق');
+                return;
+            }
+
+            const post = state.posts.find(p => p.id === postId);
+            if (!post) return;
+
+            if (!post.comments) post.comments = [];
+
+            const newComment = {
+                id: generateId('COMMENT'),
+                studentId: state.isAdmin ? 'admin' : state.currentUser.id,
+                content: commentContent.trim(),
+                date: new Date().toISOString()
+            };
+
+            post.comments.push(newComment);
+
+            if (post.studentId !== newComment.studentId) {
+                const commenterName = state.isAdmin ? state.settings.adminName : state.currentUser.name;
+                addNotification('comment', `${commenterName} علق على منشورك`, postId);
+            }
+
+            saveState();
+            showComments(postId);
+        }
+
+        function showAddNoteForm() {
+            showModal(`
+                <div class="card-title">إضافة مذكرة جديدة</div>
+                <div class="form-group">
+                    <label class="form-label">عنوان المذكرة</label>
+                    <input type="text" class="form-control" id="newNoteTitle" placeholder="أدخل عنوان المذكرة">
+                </div>
+                <div class="form-group">
+                    <label class="form-label">محتوى المذكرة</label>
+                    <textarea class="form-control" id="newNoteContent" rows="5" placeholder="اكتب محتوى المذكرة هنا..."></textarea>
+                </div>
+                <div style="display: flex; gap: 10px; margin-top: 20px;">
+                    <button class="btn btn-secondary" onclick="hideModal()">إلغاء</button>
+                    <button class="btn btn-success" onclick="saveNewNote()">حفظ المذكرة</button>
+                </div>
+            `);
+        }
+
+        function saveNewNote() {
+            const title = $('#newNoteTitle').value;
+            const content = $('#newNoteContent').value;
+
+            if (!title.trim() || !content.trim()) {
+                alert('يرجى ملء جميع الحقول المطلوبة');
+                return;
+            }
+
+            const newNote = {
+                id: generateId('NOTE'),
+                studentId: state.isAdmin ? 'admin' : state.currentUser.id,
+                title: title.trim(),
+                content: content.trim(),
+                date: new Date().toISOString()
+            };
+
+            state.notes.push(newNote);
+            saveState();
+            hideModal();
+            showNotes();
+            alert('تم حفظ المذكرة بنجاح');
+        }
+
+        function viewNote(noteId) {
+            const note = state.notes.find(n => n.id === noteId);
+            if (!note) return;
+
+            showModal(`
+                <div class="card-title">${escapeHtml(note.title)}</div>
+                <div class="card">
+                    <p style="white-space: pre-wrap;">${escapeHtml(note.content)}</p>
+                    <small style="color: #666;">${formatDate(note.date)}</small>
+                </div>
+                <div style="display: flex; gap: 10px; margin-top: 20px;">
+                    <button class="btn btn-danger" onclick="deleteNote('${noteId}')">حذف المذكرة</button>
+                    <button class="btn btn-secondary" onclick="hideModal()">إغلاق</button>
+                </div>
+            `);
+        }
+
+        function deleteNote(noteId) {
+            if (!confirm('هل أنت متأكد من حذف هذه المذكرة؟')) {
+                return;
+            }
+
+            state.notes = state.notes.filter(n => n.id !== noteId);
+            saveState();
+            hideModal();
+            showNotes();
+            alert('تم حذف المذكرة بنجاح');
+        }
+
+        function showAdminProfileSettings() {
+            showModal(`
+                <div class="card-title">إعدادات المشرف</div>
+                <div class="form-group">
+                    <label class="form-label">الاسم الشخصي للمشرف</label>
+                    <input type="text" class="form-control" id="adminPersonalName" value="${escapeHtml(state.settings.adminName)}" placeholder="أدخل الاسم الشخصي">
+                </div>
+                <div class="form-group">
+                    <label class="form-label">صورة الملف الشخصي</label>
+                    <input type="file" class="form-control" id="adminProfilePhoto" accept="image/*">
+                </div>
+                <div class="form-group">
+                    <label class="form-label">صورة الغلاف</label>
+                    <input type="file" class="form-control" id="adminCoverPhoto" accept="image/*">
+                </div>
+                <div style="display: flex; gap: 10px; margin-top: 20px;">
+                    <button class="btn btn-secondary" onclick="hideModal()">إلغاء</button>
+                    <button class="btn btn-success" onclick="saveAdminProfileSettings()">حفظ الإعدادات</button>
+                </div>
+            `);
+        }
+
+        function saveAdminProfileSettings() {
+            const adminName = $('#adminPersonalName').value;
+            if (adminName) {
+                state.settings.adminName = adminName;
+            }
+
+            const profilePhotoInput = $('#adminProfilePhoto');
+            const coverPhotoInput = $('#adminCoverPhoto');
+
+            const processProfilePhoto = () => {
+                if (profilePhotoInput.files.length > 0) {
+                    const file = profilePhotoInput.files[0];
+                    const reader = new FileReader();
+                    reader.onload = function(e) {
+                        state.adminProfile.profilePhoto = e.target.result;
+                        processCoverPhoto();
+                    };
+                    reader.readAsDataURL(file);
+                } else {
+                    processCoverPhoto();
+                }
+            };
+
+            const processCoverPhoto = () => {
+                if (coverPhotoInput.files.length > 0) {
+                    const file = coverPhotoInput.files[0];
+                    const reader = new FileReader();
+                    reader.onload = function(e) {
+                        state.adminProfile.coverPhoto = e.target.result;
+                        finishSave();
+                    };
+                    reader.readAsDataURL(file);
+                } else {
+                    finishSave();
+                }
+            };
+
+            const finishSave = () => {
+                saveState();
+                hideModal();
+                renderHeader();
+                alert('تم حفظ الإعدادات بنجاح');
+            };
+
+            processProfilePhoto();
+        }
+
+        function showStudentProfileSettings() {
+            if (!state.currentUser) return;
+
+            showModal(`
+                <div class="card-title">إعدادات الملف الشخصي</div>
+                <div class="form-group">
+                    <label class="form-label">صورة الملف الشخصي</label>
+                    <input type="file" class="form-control" id="studentProfilePhoto" accept="image/*">
+                </div>
+                <div class="form-group">
+                    <label class="form-label">صورة الغلاف</label>
+                    <input type="file" class="form-control" id="studentCoverPhoto" accept="image/*">
+                </div>
+                <div class="form-group">
+                    <label class="form-label">
+                        <input type="checkbox" id="profilePublic" ${state.currentUser.profilePublic !== false ? 'checked' : ''}> 
+                        الملف الشخصي عام
+                    </label>
+                </div>
+                <div style="display: flex; gap: 10px; margin-top: 20px;">
+                    <button class="btn btn-secondary" onclick="hideModal()">إلغاء</button>
+                    <button class="btn btn-success" onclick="saveStudentProfileSettings()">حفظ الإعدادات</button>
+                </div>
+            `);
+        }
+
+        function saveStudentProfileSettings() {
+            if (!state.currentUser) return;
+
+            const profilePhotoInput = $('#studentProfilePhoto');
+            const coverPhotoInput = $('#studentCoverPhoto');
+
+            state.currentUser.profilePublic = $('#profilePublic').checked;
+
+            if (profilePhotoInput.files.length > 0) {
+                const file = profilePhotoInput.files[0];
+                const reader = new FileReader();
+                reader.onload = function(e) {
+                    state.currentUser.profilePhoto = e.target.result;
+                    if (coverPhotoInput.files.length > 0) {
+                        const coverFile = coverPhotoInput.files[0];
+                        const coverReader = new FileReader();
+                        coverReader.onload = function(e) {
+                            state.currentUser.coverPhoto = e.target.result;
+                            saveState();
+                            hideModal();
+                            renderHeader();
+                            alert('تم حفظ الإعدادات بنجاح');
+                        };
+                        coverReader.readAsDataURL(coverFile);
+                    } else {
+                        saveState();
+                        hideModal();
+                        renderHeader();
+                        alert('تم حفظ الإعدادات بنجاح');
+                    }
+                };
+                reader.readAsDataURL(file);
+            } else if (coverPhotoInput.files.length > 0) {
+                const file = coverPhotoInput.files[0];
+                const reader = new FileReader();
+                reader.onload = function(e) {
+                    state.currentUser.coverPhoto = e.target.result;
+                    saveState();
+                    hideModal();
+                    renderHeader();
+                    alert('تم حفظ الإعدادات بنجاح');
+                };
+                reader.readAsDataURL(file);
+            } else {
+                saveState();
+                hideModal();
+                renderHeader();
+                alert('تم حفظ الإعدادات بنجاح');
+            }
+        }
+
+        function createStudentPassword() {
+            if (!state.currentUser) return;
+
+            const password = prompt('أدخل كلمة المرور الجديدة:');
+            if (password) {
+                if (password.length < 4) {
+                    alert('كلمة المرور يجب أن تكون 4 أحرف على الأقل');
+                    return;
+                }
+
+                state.currentUser.password = password;
+                saveState();
+                alert('تم إنشاء كلمة المرور بنجاح');
+            }
+        }
+
+        function changeAdminPassword() {
+            const currentPassword = prompt('أدخل كلمة المرور الحالية:');
+            if (currentPassword !== state.settings.adminPassword) {
+                alert('كلمة المرور الحالية غير صحيحة');
+                return;
+            }
+
+            const newPassword = prompt('أدخل كلمة المرور الجديدة:');
+            if (newPassword) {
+                if (newPassword.length < 4) {
+                    alert('كلمة المرور يجب أن تكون 4 أحرف على الأقل');
+                    return;
+                }
+
+                state.settings.adminPassword = newPassword;
+                saveState();
+                alert('تم تغيير كلمة المرور بنجاح');
+            }
+        }
+
+        function toggleDarkMode() {
+            state.settings.theme = state.settings.theme === 'dark' ? 'light' : 'dark';
+            document.body.classList.toggle('dark-theme', state.settings.theme === 'dark');
+            saveState();
+            renderHeader();
+        }
+
+        function showAboutSystem() {
+            showModal(`
+                <div class="card-title">حول النظام</div>
+                <div class="card">
+                    <p><strong>نظام إدارة نقل الطلاب المتكامل</strong></p>
+                    <p>نظام متكامل لإدارة عمليات نقل الطلاب يشمل:</p>
+                    <ul>
+                        <li>إدارة الطلاب والباقات</li>
+                        <li>نظام حجز متطور (يومي وأسبوعي)</li>
+                        <li>تسجيل الرحلات والتقارير</li>
+                        <li>نظام مجتمعي للتواصل</li>
+                        <li>إشعارات فورية</li>
+                        <li>واجهة مستخدم متجاوبة</li>
+                    </ul>
+                    <p>تم تطويره بلغات HTML5, CSS3, JavaScript</p>
+                </div>
+                <div style="display: flex; gap: 10px; margin-top: 20px;">
+                    <button class="btn btn-secondary" onclick="hideModal()">إغلاق</button>
+                </div>
+            `);
+        }
+
+        function showSystemSettings() {
+            showModal(`
+                <div class="card-title">إعدادات النظام</div>
+                <div class="form-group">
+                    <label class="form-label">شعار النظام</label>
+                    <input type="file" class="form-control" id="systemLogo" accept="image/*">
+                    <small class="form-text">الصورة ستعرض بشكل دائري</small>
+                </div>
+                <div class="form-group">
+                    <label class="form-label">اسم النظام</label>
+                    <input type="text" class="form-control" id="systemName" value="${escapeHtml(state.company.name)}">
+                </div>
+                <div class="form-group">
+                    <label class="form-label">الوضع الداكن</label>
+                    <div>
+                        <button class="btn ${state.settings.theme === 'dark' ? 'btn-primary' : 'btn-secondary'}" onclick="toggleDarkMode()">
+                            <i class="fas fa-moon"></i> ${state.settings.theme === 'dark' ? 'مفعل' : 'غير مفعل'}
+                        </button>
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label class="form-label">صوت الإشعارات</label>
+                    <div>
+                        <button class="btn ${state.settings.notificationSound ? 'btn-primary' : 'btn-secondary'}" onclick="toggleNotificationSound()">
+                            <i class="fas fa-volume-up"></i> ${state.settings.notificationSound ? 'مفعل' : 'غير مفعل'}
+                        </button>
+                    </div>
+                </div>
+                <div style="display: flex; gap: 10px; margin-top: 20px;">
+                    <button class="btn btn-secondary" onclick="hideModal()">إلغاء</button>
+                    <button class="btn btn-success" onclick="saveSystemSettings()">حفظ</button>
+                </div>
+            `);
+        }
+
+        function toggleNotificationSound() {
+            state.settings.notificationSound = !state.settings.notificationSound;
+            saveState();
+            showSystemSettings();
+        }
+
+        function saveSystemSettings() {
+            const systemName = $('#systemName').value;
+            if (systemName) {
+                state.company.name = systemName;
+            }
+
+            const logoInput = $('#systemLogo');
+            if (logoInput.files.length > 0) {
+                const file = logoInput.files[0];
+                const reader = new FileReader();
+                reader.onload = function(e) {
+                    state.company.logo = e.target.result;
+                    updateLoginLogo();
+                    saveState();
+                    hideModal();
+                    renderHeader();
+                    alert('تم حفظ الإعدادات بنجاح');
+                };
+                reader.readAsDataURL(file);
+            } else {
+                saveState();
+                hideModal();
+                renderHeader();
+                alert('تم حفظ الإعدادات بنجاح');
+            }
+        }
+
+        function updateLoginLogo() {
+            const systemLogo = $('#systemLogo');
+            if (systemLogo && state.company.logo) {
+                systemLogo.innerHTML = `<img src="${state.company.logo}" alt="شعار النظام">`;
+            }
+        }
+
+        function showVersionInfo() {
+            showModal(`
+                <div class="card-title">معلومات الإصدار</div>
+                <div class="card">
+                    <div class="student-info-item">
+                        <span>الإصدار:</span>
+                        <span>${state.company.version}</span>
+                    </div>
+                    <div class="student-info-item">
+                        <span>المطور:</span>
+                        <span>Mohamad Hamidah</span>
+                    </div>
+                    <div class="student-info-item">
+                        <span>حقوق النشر:</span>
+                        <span>© 2024 الرقيم لخدمات النقل الخاص - جميع الحقوق محفوظة</span>
+                    </div>
+                </div>
+                <div style="display: flex; gap: 10px; margin-top: 20px;">
+                    <button class="btn btn-secondary" onclick="hideModal()">إغلاق</button>
+                </div>
+            `);
+        }
+
+        function saveData() {
+            const dataStr = JSON.stringify(state, null, 2);
+            const dataBlob = new Blob([dataStr], { type: 'application/json' });
+            const url = URL.createObjectURL(dataBlob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = 'student_transport_system_backup.json';
+            a.click();
+            URL.revokeObjectURL(url);
+            alert('تم حفظ نسخة احتياطية من البيانات');
+        }
+
+        function restoreData() {
+            const input = document.createElement('input');
+            input.type = 'file';
+            input.accept = '.json';
+            input.onchange = function(e) {
+                const file = e.target.files[0];
+                const reader = new FileReader();
+                reader.onload = function(e) {
+                    try {
+                        const restoredState = JSON.parse(e.target.result);
+                        Object.keys(state).forEach(key => {
+                            if (restoredState[key] !== undefined) {
+                                state[key] = restoredState[key];
+                            }
+                        });
+                        saveState();
+                        alert('تم استعادة البيانات بنجاح. سيتم إعادة تحميل الصفحة.');
+                        location.reload();
+                    } catch (error) {
+                        alert('خطأ في استعادة البيانات: ' + error.message);
+                    }
+                };
+                reader.readAsText(file);
+            };
+            input.click();
+        }
+
+        function resetSystem() {
+            if (!confirm('⚠️ تحذير: هذا الإجراء سيمسح جميع البيانات ولا يمكن التراجع عنه. هل أنت متأكد؟')) {
+                return;
+            }
+
+            if (!confirm('❌ تأكيد نهائي: جميع البيانات سيتم حذفها بشكل دائم. هل أنت متأكد جداً؟')) {
+                return;
+            }
+
+            localStorage.removeItem(SYSTEM_KEY);
+            alert('تم تصفير النظام بنجاح. سيتم إعادة تحميل الصفحة.');
+            location.reload();
+        }
+
+        function showMessageToAdminForm() {
+            showModal(`
+                <div class="card-title">إرسال ملاحظة للمشرف</div>
+                <div class="form-group">
+                    <label class="form-label">الملاحظة</label>
+                    <textarea class="form-control" id="messageToAdmin" rows="4" placeholder="اكتب ملاحظتك هنا..."></textarea>
+                </div>
+                <div style="display: flex; gap: 10px; margin-top: 20px;">
+                    <button class="btn btn-secondary" onclick="hideModal()">إلغاء</button>
+                    <button class="btn btn-success" onclick="sendMessageToAdmin()">إرسال</button>
+                </div>
+            `);
+        }
+
+        function sendMessageToAdmin() {
+            const message = $('#messageToAdmin').value;
+            if (!message.trim()) {
+                alert('يرجى كتابة الملاحظة');
+                return;
+            }
+
+            const newMessage = {
+                id: generateId('MSG'),
+                studentId: state.currentUser.id,
+                content: message.trim(),
+                date: new Date().toISOString(),
+                read: false
+            };
+
+            state.messages.push(newMessage);
+            saveState();
+            hideModal();
+            alert('تم إرسال الملاحظة بنجاح للمشرف');
+        }
+
+        function showQRScanner() {
+            showModal(`
+                <div class="card-title">ماسح QR Code</div>
+                <div class="card">
+                    <p>هذه الخاصية تتطلب كاميرا الجهاز. في التطبيق الكامل، سيتم تفعيل ماسح QR Code الحقيقي.</p>
+                    <div id="qrScanner" style="width: 100%; height: 300px; background: #f0f0f0; display: flex; align-items: center; justify-content: center; border-radius: 8px;">
+                        <i class="fas fa-qrcode" style="font-size: 64px; color: #666;"></i>
+                    </div>
+                </div>
+                <div style="display: flex; gap: 10px; margin-top: 20px;">
+                    <button class="btn btn-secondary" onclick="hideModal()">إغلاق</button>
+                    <button class="btn btn-primary" onclick="simulateQRScan()">محاكاة المسح</button>
+                </div>
+            `);
+        }
+
+        function simulateQRScan() {
+            const randomStudent = state.students[Math.floor(Math.random() * state.students.length)];
+            if (randomStudent) {
+                hideModal();
+                viewStudentCard(randomStudent.id);
+            }
+        }
+
+        function showFilterByPackage() {
+            showModal(`
+                <div class="card-title">عرض الطلاب حسب الباقة</div>
+                <div class="form-group">
+                    <label class="form-label">اختر الباقة</label>
+                    <select class="form-control" id="filterPackage">
+                        <option value="">جميع الباقات</option>
+                        ${state.packages.map(pkg => `
+                            <option value="${pkg.id}">${pkg.name}</option>
+                        `).join('')}
+                    </select>
+                </div>
+                <div style="display: flex; gap: 10px; margin-top: 20px;">
+                    <button class="btn btn-secondary" onclick="hideModal()">إلغاء</button>
+                    <button class="btn btn-primary" onclick="applyPackageFilter()">تطبيق التصفية</button>
+                </div>
+            `);
+        }
+
+        function applyPackageFilter() {
+            const packageId = $('#filterPackage').value;
+            hideModal();
+            
+            if (!packageId) {
+                showStudentsManagement();
+                return;
+            }
+
+            const filteredStudents = state.students.filter(s => s.packageId === packageId);
+            const packageInfo = state.packages.find(p => p.id === packageId);
+
+            $('#appContent').innerHTML = `
+                <div class="card">
+                    <div class="card-title">الطلاب في باقة ${packageInfo?.name || 'غير معروفة'} (${filteredStudents.length})</div>
+                    <button class="btn btn-secondary" onclick="showStudentsManagement()">
+                        <i class="fas fa-arrow-right"></i> العودة للقائمة الكاملة
+                    </button>
+                </div>
+
+                <div class="card">
+                    <div class="table-container">
+                        <table class="table">
+                            <thead>
+                                <tr>
+                                    <th>المعرف</th>
+                                    <th>الاسم</th>
+                                    <th>الهاتف</th>
+                                    <th>الرحلات</th>
+                                    <th>المسار</th>
+                                    <th>الإجراءات</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                ${filteredStudents.map(student => {
+                                    return `
+                                        <tr>
+                                            <td>${student.id}</td>
+                                            <td>${escapeHtml(student.name)}</td>
+                                            <td>${student.phone}</td>
+                                            <td>${student.rides || 0}</td>
+                                            <td>${escapeHtml(student.route || 'غير محدد')}</td>
+                                            <td>
+                                                <button class="btn btn-primary btn-small" onclick="viewStudentCard('${student.id}')">
+                                                    <i class="fas fa-eye"></i> معاينة
+                                                </button>
+                                                <button class="btn btn-warning btn-small" onclick="addRidesToStudent('${student.id}')">
+                                                    <i class="fas fa-plus"></i> رحلات
+                                                </button>
+                                            </td>
+                                        </tr>
+                                    `;
+                                }).join('')}
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            `;
+        }
+
+        function showAssignPackageToGroup() {
+            showModal(`
+                <div class="card-title">تعيين باقة لمجموعة طلاب</div>
+                <div class="form-group">
+                    <label class="form-label">اختر الباقة</label>
+                    <select class="form-control" id="groupPackage">
+                        ${state.packages.map(pkg => `
+                            <option value="${pkg.id}">${pkg.name}</option>
+                        `).join('')}
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label class="form-label">الطلاب المحددين</label>
+                    <div style="max-height: 200px; overflow-y: auto; border: 1px solid var(--border-color); border-radius: 8px; padding: 10px;">
+                        ${state.students.map(student => `
+                            <div style="margin-bottom: 5px;">
+                                <label>
+                                    <input type="checkbox" value="${student.id}" class="student-checkbox"> 
+                                    ${student.name} (${student.id})
+                                </label>
+                            </div>
+                        `).join('')}
+                    </div>
+                </div>
+                <div style="display: flex; gap: 10px; margin-top: 20px;">
+                    <button class="btn btn-secondary" onclick="hideModal()">إلغاء</button>
+                    <button class="btn btn-success" onclick="assignPackageToSelectedStudents()">تعيين الباقة</button>
+                </div>
+            `);
+        }
+
+        function assignPackageToSelectedStudents() {
+            const packageId = $('#groupPackage').value;
+            const selectedStudents = $$('.student-checkbox:checked');
+            
+            if (selectedStudents.length === 0) {
+                alert('يرجى اختيار طالب واحد على الأقل');
+                return;
+            }
+
+            const packageInfo = state.packages.find(p => p.id === packageId);
+            if (!packageInfo) {
+                alert('الباقة غير موجودة');
+                return;
+            }
+
+            selectedStudents.forEach(checkbox => {
+                const studentId = checkbox.value;
+                const student = state.students.find(s => s.id === studentId);
+                if (student) {
+                    student.packageId = packageId;
+                    student.rides = packageInfo.rides;
+                }
+            });
+
+            saveState();
+            hideModal();
+            showPackagesManagement();
+            alert(`تم تعيين الباقة لـ ${selectedStudents.length} طالب بنجاح`);
+        }
+
+        // ==================== التهيئة النهائية ====================
+        document.addEventListener('DOMContentLoaded', function() {
+            loadState();
+            console.log('✅ نظام إدارة نقل الطلاب - النسخة النهائية - جاهز للتشغيل');
+            
+            updateLoginLogo();
+            
+            setTimeout(() => {
+                if (state.students.length > 0) {
+                    console.log('✅ البيانات محملة بنجاح:', state.students.length + ' طالب');
+                }
+            }, 100);
+            
+            setupAutomaticBookingSystem();
+        });
+
+    </script>
+</body>
+</html>
